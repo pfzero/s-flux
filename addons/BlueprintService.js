@@ -139,7 +139,7 @@ BlueprintService.prototype.AddTo = function(request, resourceId, subResource, su
     var uri = this.getResourceName() + "/" + resourceId + "/" + subResource;
 
     return new Promise(function(resolve, reject) {
-        require('POST', uri).send(subResourceData).end(defaultResponseHandler.bind(this, resolve, reject));
+        request('POST', uri).send(subResourceData).end(defaultResponseHandler.bind(this, resolve, reject));
     });
 }
 
