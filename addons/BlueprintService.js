@@ -75,7 +75,7 @@ BlueprintService.prototype.Create = function(request, data) {
         request("POST", this.getResourceName())
             .send(data)
             .end(defaultResponseHandler.bind(this, resolve, reject));
-    });
+    }.bind(this));
 };
 
 BlueprintService.prototype.Update = function(request, resourceId, data) {
@@ -85,7 +85,7 @@ BlueprintService.prototype.Update = function(request, resourceId, data) {
         request("PUT", uri)
             .send(data)
             .end(defaultResponseHandler.bind(this, resolve, reject));
-    });
+    }.bind(this));
 };
 
 // alias Update
@@ -99,7 +99,7 @@ BlueprintService.prototype.Delete = function(request, resourceId) {
     return new Promise(function(resolve, reject) {
         request("DELETE", uri)
             .end(defaultResponseHandler.bind(this, resolve, reject));
-    });
+    }.bind(this));
 }
 
 BlueprintService.prototype.GetById = function(request, resourceId) {
@@ -108,7 +108,7 @@ BlueprintService.prototype.GetById = function(request, resourceId) {
     return new Promise(function(resolve, reject) {
         request("GET", uri)
             .end(defaultResponseHandler.bind(this, resolve, reject));
-    });
+    }.bind(this));
 }
 
 BlueprintService.prototype.GetBy = function(request, fields) {
@@ -132,7 +132,7 @@ BlueprintService.prototype.Find = function(request, query) {
         request("GET", this.getResourceName())
             .query(parsedQuery)
             .end(defaultResponseHandler.bind(this, resolve, reject));
-    });
+    }.bind(this));
 }
 
 BlueprintService.prototype.AddTo = function(request, resourceId, subResource, subResourceData) {
@@ -140,7 +140,7 @@ BlueprintService.prototype.AddTo = function(request, resourceId, subResource, su
 
     return new Promise(function(resolve, reject) {
         request('POST', uri).send(subResourceData).end(defaultResponseHandler.bind(this, resolve, reject));
-    });
+    }.bind(this));
 }
 
 BlueprintService.prototype.Link = function(request, resourceId, subResource, subResourceId) {
@@ -149,7 +149,7 @@ BlueprintService.prototype.Link = function(request, resourceId, subResource, sub
     return new Promise(function(resolve, reject) {
         request("GET", uri)
             .end(defaultResponseHandler.bind(this, resolve, reject));
-    });
+    }.bind(this));
 }
 
 BlueprintService.prototype.UnLink = function(request, resourceId, subResource, subResourceId) {
@@ -158,7 +158,7 @@ BlueprintService.prototype.UnLink = function(request, resourceId, subResource, s
     return new Promise(function(resolve, reject) {
         request("DELETE", uri)
             .end(defaultResponseHandler.bind(this, resolve, reject));
-    });
+    }.bind(this));
 }
 
 module.exports = BlueprintService;
