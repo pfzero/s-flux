@@ -36,8 +36,8 @@ var Rest = {
       .accept('json'),
       serverReq = context.req;
 
-    if (serverReq) {
-      r.set('Cookie', server.get('Cookie'));
+    if (typeof serverReq === 'object') {
+      r.set('Cookie', serverReq.get('Cookie'));
     }
 
     return r;
