@@ -3,11 +3,12 @@
 var superagent = require('superagent'),
   debug = require('debug')("app:services:Rest");
 
-
-var API_ROOT,
-  TIMEOUT = 10000;
-
 var Rest = {
+
+  config: {
+    API_URL: "",
+    TIMEOUT: 10000
+  },
 
   /**
    * this is the base request used to communicate with the API server
@@ -18,12 +19,15 @@ var Rest = {
    */
   request: function(context, method, endpoint) {
 
-    if (undefined === API_ROOT) {
-      throw new Error("You must provide the API_ROOT before using any flux actions. You must pass it in config property when creating the dispatcher");
+    var API_URL = Rest.config.API_URL,
+        TIMEOUT = Rest.config.TIMEOUT;
+
+    if ("" === API_URL) {
+      throw new Error("You must provide the API_URL before using any flux actions. You must pass it in config property when creating the dispatcher");
     }
 
-    if (endpoint.indexOf(API_ROOT) === -1) {
-      endpoint = API_ROOT + endpoint;
+    if (endpoint.indexOf(API_URL) === -1) {
+      endpoint = API_URL + endpoint;
     }
 
     var r = superagent(method, endpoint)
@@ -40,10 +44,7 @@ var Rest = {
   },
 
   setConfig: function(config) {
-    API_ROOT = config.API_ROOT;
-    if (config.TIMEOUT) {
-      TIMEOUT = config.TIMEOUT;
-    }
+    Rest.config = config;
   }
 };
 
