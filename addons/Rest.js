@@ -47,4 +47,4 @@ var Rest = {
   }
 };
 
-export default Rest;
+module.exports = Rest;
