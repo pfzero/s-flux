@@ -2,9 +2,7 @@
 
 import debug from "debug";
 import Im from "immutable";
-
 import BaseStore from 'dispatchr/addons/BaseStore';
-
 import Backup from "./Backup";
 
 let storeDebug = debug("app:flux:Stores:BlueprintStore");

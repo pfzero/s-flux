@@ -1,5 +1,3 @@
-import _ from "lodash";
-
 /**
  * Simple utility class for storing old
  * objects.

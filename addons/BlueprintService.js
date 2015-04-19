@@ -1,4 +1,3 @@
-import _ from "lodash";
 import debug from "debug";
 import errors from "../constants/errors"
 
@@ -43,7 +42,7 @@ class BlueprintService {
         };
 
         // not found
-        if(response.notFound) {
+        if (response.notFound) {
             parsed = errors.E_NOT_FOUND;
             parsed.hasError = true;
             parsed.summary = response.xhr.responseText;
@@ -51,7 +50,7 @@ class BlueprintService {
         }
 
         // bad request
-        if(response.badRequest) {
+        if (response.badRequest) {
             parsed = response.body || errors.E_BAD_REQUEST;
             parsed.hasError = true;
             parsed.summary = !response.body && response.xhr.responseText;
@@ -59,9 +58,9 @@ class BlueprintService {
         }
 
         // internal error
-        if(response.status === 500) {
+        if (response.status === 500) {
             parsed = response.body || errors.E_INTERNAL;
-            parsed.hasError = true;            
+            parsed.hasError = true;
             return parsed;
         }
 
@@ -121,13 +120,15 @@ class BlueprintService {
 
     Find(request, query) {
 
-        let parsedQuery = {};
+        let parsedQuery = {},
+            qKeys = Object.keys(query);
 
-        _.forEach(query, function(searchValue, searchkey) {
-            if (_.isObject(searchValue)) {
-                parsedQuery[searchkey] = JSON.stringify(searchValue);
+        qKeys.forEach(function(searchKey) {
+            let searchValue = query[searchKey];
+            if (typeof searchValue === 'object') {
+                parsedQuery[searchKey] = JSON.stringify(searchValue);
             } else {
-                parsedQuery[searchkey] = searchValue;
+                parsedQuery[searchKey] = searchValue;
             }
         });
 
