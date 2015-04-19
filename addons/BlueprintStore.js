@@ -240,7 +240,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 				newCollection = this.GetAll();
 
 			imList.forEach(function(item) {
-				let id = item.get('id'),
+				var id = item.get('id'),
 					existingIndex = this.GetAll().findIndex(function(oldItem) {
 						return oldItem.get('id') === id;
 					});
@@ -284,7 +284,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 		 *                         }
 		 */
 		dispatchHandlersNS.DeleteOptimistic = function(payload) {
-			let resourceId = payload.givenInput,
+			var resourceId = payload.givenInput,
 				resource = this.GetById(resourceId),
 				index = this.GetAll().findIndex(function(item) {
 					return item.get('id') === resourceId;
@@ -424,7 +424,7 @@ BlueprintStore.prototype.GetLastSearch = function() {
 	return this.lastSearch;
 }
 
-BlueprintStore.prototype.GetListByIds() {
+BlueprintStore.prototype.GetListByIds = function() {
 	var allItems = this.GetAll(),
 		ids = [];
 
@@ -445,7 +445,7 @@ BlueprintStore.prototype.GetListByIds() {
 }
 
 
-BlueprintStore.GetHandlers = function(resourceName = "") {
+BlueprintStore.GetHandlers = function(resourceName) {
 	return getHandlers(resourceName);
 };
 

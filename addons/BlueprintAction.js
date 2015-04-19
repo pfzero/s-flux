@@ -1,5 +1,6 @@
 var blueprintActionDebug = require('debug')("app:flux:actions:BlueprintAction"),
-    getActionConstants = require('./getActionConstants');
+    getActionConstants = require('./getActionConstants'),
+    BlueprintService = require('./BlueprintService');
 
 
 /**

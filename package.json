@@ -20,8 +20,9 @@
   "dependencies": {
     "debug": "2.x.x",
     "eventemitter3": "0.x.x",
-    "inherits": "^2.0.1",
-    "superagent": "0.x.x"
+    "inherits": "2.x.x",
+    "superagent": "0.x.x",
+    "bluebird": "2.x.x"
   },
   "devDependencies": {
     "chai": "^1.9.1",

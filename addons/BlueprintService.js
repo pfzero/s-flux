@@ -20,7 +20,7 @@ function BlueprintService(opts) {
         throw new TypeError("Required resourceName is missing! The resourceName is required when making server requests.");
     }
 
-    let resourceName = opts.resourceName.toLowerCase();
+    var resourceName = opts.resourceName.toLowerCase();
 
     this.getResourceName = function() {
         return resourceName;
@@ -89,7 +89,7 @@ BlueprintService.prototype.Update = function(request, resourceId, data) {
 };
 
 // alias Update
-BlueprintService.prototype.Batch(request, resourceId, data) {
+BlueprintService.prototype.Batch = function(request, resourceId, data) {
     return this.Update(resourceId, data);
 };
 
