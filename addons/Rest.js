@@ -1,13 +1,13 @@
 'use strict';
 
 var superagent = require('superagent'),
-  debug = require('debug')("app:services:APIUtils");
+  debug = require('debug')("app:services:Rest");
 
 
 var API_ROOT,
   TIMEOUT = 10000;
 
-var APIUtils = {
+var Rest = {
 
   /**
    * this is the base request used to communicate with the API server
@@ -47,4 +47,4 @@ var APIUtils = {
   }
 };
 
-export default APIUtils;
+export default Rest;

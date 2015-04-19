@@ -1,11 +1,11 @@
 {
-  "name": "dispatchr",
+  "name": "sflux",
   "version": "0.3.2",
   "description": "A Flux dispatcher for applications that run on the server and the client.",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/yahoo/dispatchr.git"
+    "url": "git://github.com/pfzero/s-flux.git"
   },
   "scripts": {
     "cover": "node node_modules/istanbul/lib/cli.js cover --dir artifacts -- ./node_modules/mocha/bin/_mocha tests/unit/ --recursive --reporter spec",
@@ -13,12 +13,10 @@
     "test": "./node_modules/.bin/mocha tests/unit/ --recursive --reporter spec"
   },
   "author": "Michael Ridgway <mridgway@yahoo-inc.com",
-  "licenses": [
-    {
-      "type": "BSD",
-      "url": "https://github.com/yahoo/dispatchr/blob/master/LICENSE.md"
-    }
-  ],
+  "licenses": [{
+    "type": "BSD",
+    "url": "https://github.com/yahoo/dispatchr/blob/master/LICENSE.md"
+  }],
   "dependencies": {
     "debug": "^2.0.0",
     "eventemitter3": "^0.1.6",
