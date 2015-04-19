@@ -1,42 +1,57 @@
-import debug from "debug";
-
-import BlueprintService from "./BlueprintService";
-
-let blueprintActionDebug = debug("app:flux:actions:BlueprintAction");
+var blueprintActionDebug = require('debug')("app:flux:actions:BlueprintAction"),
+    getActionConstants = require('./getActionConstants');
 
 
 /**
  * genericActionCreator is the main function used
  * to create actions and dispatch to stores
  * @param  {Context} ctx       Fluxible Context
- * @param  {Object} constants  the constants object, it should contain 
+ * @param  {Object} constants  the constants object, it should contain
  *                             the properties: base, success, error
  *                             and complete
- * 
+ *
  * @param  {Function} apiFn    the service function for communication
  *                             with server API
- *                             
+ *
  * @param  {Object} givenInput The received input from components
  * @return {Promise}           the resolved promise from service
  *                             function
  */
-let genericActionCreator = function(ctx, constants, apiFn, ...givenInput) {
+var genericActionCreator = function(ctx, constants, apiFn) {
+
+    var givenInput = [],
+        args;
+
+    // drain arguments
+    for (var i = 3, _l = arguments.length; i < _l; i++) {
+        givenInput.push(arguments[i]);
+    };
+
+    args = givenInput;
+    args.unshift(ctx.getBaseRequest());
+
     blueprintActionDebug("dispatching...", constants.base);
 
-    ctx.dispatch(constants.base, {givenInput});
+    ctx.dispatch(constants.base, {
+        givenInput: givenInput
+    });
 
-    return apiFn(ctx.getBaseRequest(), ...givenInput)
-        .then(res => {
-            ctx.dispatch(constants.success, {givenInput, res});
+    return apiFn.apply(null, args)
+        .then(function(res) {
+            ctx.dispatch(constants.success, {
+                givenInput: givenInput,
+                res: res
+            });
             ctx.dispatch(constants.complete);
         })
-        .catch(err => {
-            ctx.dispatch(constants.error, {givenInput, err});
+        .catch(function(err) {
+            ctx.dispatch(constants.error, {
+                givenInput: givenInput,
+                err: err
+            });
             ctx.dispatch(constants.complete);
         });
 };
-
-
 
 /**
  * BlueprintAction is the base class for creating
@@ -48,7 +63,7 @@ let genericActionCreator = function(ctx, constants, apiFn, ...givenInput) {
  * @class BlueprintAction
  * @abstract
  *
- * Note: This class should be extended, as it provides the base functionality for 
+ * Note: This class should be extended, as it provides the base functionality for
  *       a blueprint server api
  *
  * @example
@@ -66,7 +81,7 @@ let genericActionCreator = function(ctx, constants, apiFn, ...givenInput) {
  *
  * DELETE   /restApi/users/:userId/:subResource/:subResourceId              -> remove a subresource from user's list
  *                                                                             (e.g. remove a book from user's list of books)
- * 
+ *
  * class UserAction extends BlueprintAction {
  *     constructor() {
  *         let resourceName = "users";
@@ -87,143 +102,99 @@ let genericActionCreator = function(ctx, constants, apiFn, ...givenInput) {
  * userActions.Link(ctx, userId, subResourceName, subResourceId): Promise
  * userActions.UnLink(ctx, userId, subResourceName, subResourceId): Promise
  */
-class BlueprintAction {
 
-    /**
-     * class constructor;
-     * @constructor
-     * @param  {Object} opts the constructor params
-     *                       {
-     *                           resourceName: {
-     *                               type: "string",
-     *                               required: true
-     *                           },
-     *
-     *                           apiService: {
-     *                               type: "BlueprintService",
-     *                               defaultsTo: new BlueprintService({resourceName: resourceName})
-     *                           }
-     *                       }
-     */
-    constructor(opts = {}) {
+/**
+ * class constructor;
+ * @constructor
+ * @param  {Object} opts the constructor params
+ *                       {
+ *                           resourceName: {
+ *                               type: "string",
+ *                               required: true
+ *                           },
+ *
+ *                           apiService: {
+ *                               type: "BlueprintService",
+ *                               defaultsTo: new BlueprintService({resourceName: resourceName})
+ *                           }
+ *                       }
+ */
+function BlueprintAction(opts) {
+    opts = opts || {};
 
-        if(opts.resourceName === undefined) {
-            throw new TypeError("given resourceName is requierd and must identify a resource on your server api. (e.g. users)");
-        }
-
-        // private resourceName
-        let resourceName = opts.resourceName.toLowerCase();
-
-        // private apiService
-        let apiService = opts.apiService;
-
-        if (undefined === apiService) {
-            apiService = new BlueprintService({resourceName});
-        }
-
-        this.getResourceName = function() {
-            return resourceName;
-        }
-
-        this.getApiService = function() {
-            return apiService;
-        }
+    if (opts.resourceName === undefined) {
+        throw new TypeError("given resourceName is requierd and must identify a resource on your server api. (e.g. users)");
     }
 
-    /**
-     * getActionConstants returns the 4 type of actions that will
-     * dispatch for every action
-     * @example
-     *     let constants = this.getActionConstants("create");
-     *     console.log(constants);
-     *     // will print:
-     *     {
-     *       base: "USERS_CREATE",
-     *       success: "USERS_CREATE_SUCCESS",
-     *       error: "USERS_CREATE_ERROR",
-     *       complete: "USERS_CREATE_COMPLETE"
-     *     }
-     *     
-     * @param  {String} type Action type
-     * @return {Object}      
-     */
-    getActionConstants(type = "") {
+    // private resourceName
+    var resourceName = opts.resourceName.toLowerCase();
 
-        let resourceName = this.getResourceName().toUpperCase(),
-            upperType = type.toUpperCase();
+    // private apiService
+    var apiService = opts.apiService;
 
-        return {
-            base: resourceName + "_" + upperType,
-            success: resourceName + "_" + upperType + "_SUCCESS",
-            error: resourceName + "_" + upperType + "_ERROR",
-            complete: resourceName + "_" + upperType + "_COMPLETE"
-        };
+    if (undefined === apiService) {
+        apiService = new BlueprintService({
+            resourceName: resourceName
+        });
     }
 
-
-    Create(ctx, resourceData) {
-        let apiFn = this.getApiService().Create.bind(this.getApiService()),
-            constants = this.getActionConstants("Create");
-
-        return genericActionCreator(ctx, constants, apiFn, resourceData);
+    this.getResourceName = function() {
+        return resourceName;
     }
 
-    Update(ctx, resourceId, resourceData) {
-        let apiFn = this.getApiService().Update.bind(this.getApiService()),
-            constants = this.getActionConstants("Update");
-
-        return genericActionCreator(ctx, constants, apiFn, resourceId, resourceData);
-    }
-
-    GetById(ctx, resourceId) {
-        let apiFn = this.getApiService().GetById.bind(this.getApiService()),
-            constants = this.getActionConstants("GetById");
-
-        return genericActionCreator(ctx, constants, apiFn, resourceId);
-    }
-
-    GetBy(ctx, fields) {
-        let apiFn = this.getApiService().GetBy.bind(this.getApiService()),
-            constants = this.getActionConstants("GetBy");
-
-        return genericActionCreator(ctx, constants, apiFn, fields);
-    }
-
-    Delete(ctx, resourceId) {
-        let apiFn = this.getApiService().Delete.bind(this.getApiService()),
-            constants = this.getActionConstants("Delete");
-
-        return genericActionCreator(ctx, constants, apiFn, resourceId);
-    }
-
-    Find(ctx, query) {
-        let apiFn = this.getApiService().Find.bind(this.getApiService()),
-            constants = this.getActionConstants("Find");
-
-        return genericActionCreator(ctx, constants, apiFn, query);
-    }
-
-    AddTo(ctx, resourceId, subResourceName, subResourceData) {
-        let apiFn = this.getApiService().AddTo.bind(this.getApiService()),
-            constants = this.getActionConstants("AddTo");
-
-        return genericActionCreator(ctx, constants, apiFn, resourceId, subResourceName, subResourceData);
-    }
-
-    Link(ctx, resourceId, subResourceName, subResourceId) {
-        let apiFn = this.getApiService().Link.bind(this.getApiService()),
-            constants = this.getActionConstants("Link");
-
-        return genericActionCreator(ctx, constants, apiFn, resourceId, subResourceName, subResourceId);
-    }
-
-    UnLink(ctx, resourceId, subResourceName, subResourceId) {
-        let apiFn = this.getApiService().UnLink.bind(this.getApiService()),
-            constants = this.getActionConstants("UnLink");
-
-        return genericActionCreator(ctx, constants, apiFn, resourceId, subResourceName, subResourceId);
+    this.getApiService = function() {
+        return apiService;
     }
 }
 
-export default BlueprintAction;
 
+BlueprintAction.prototype.BaseAction = function(action, ctx) {
+    var apiFn = this.getApiService()[action].bind(this.getApiService()),
+        constants = getActionConstants(this.getResourceName(), action),
+        args = [ctx, constants, apiFn];
+
+    // add the remaining arguments
+    for (var i = 2, _l = arguments.length; i < _l; i++) {
+        args.push(arguments[i]);
+    };
+
+    return genericActionCreator.apply(null, args);
+}
+
+BlueprintAction.prototype.Create = function(ctx, resourceData) {
+    return this.BaseAction("Create", ctx, resourceData);
+}
+
+BlueprintAction.prototype.Update = function(ctx, resourceId, resourceData) {
+    return this.BaseAction("Update", ctx, resourceId, resourceData);
+}
+
+BlueprintAction.prototype.GetById = function(ctx, resourceId) {
+    return this.BaseAction("GetById", ctx, resourceId);
+}
+
+BlueprintAction.prototype.GetBy = function(ctx, fields) {
+    return this.BaseAction("GetBy", ctx, fields);
+}
+
+BlueprintAction.prototype.Delete = function(ctx, resourceId) {
+    return this.BaseAction("Delete", ctx, resourceId);
+}
+
+BlueprintAction.prototype.Find = function(ctx, query) {
+    return this.BaseAction("Find", ctx, query);
+}
+
+BlueprintAction.prototype.AddTo = function(ctx, resourceId, subResourceName, subResourceData) {
+    return this.BaseAction("AddTo", ctx, resourceId, subResourceName, subResourceData);
+}
+
+BlueprintAction.prototype.Link = function(ctx, resourceId, subResourceName, subResourceId) {
+    return this.BaseAction("Link", ctx, resourceId, subResourceName, subResourceId);
+}
+
+BlueprintAction.prototype.UnLink = function(ctx, resourceId, subResourceName, subResourceId) {
+    return this.BaseAction("UnLink", ctx, resourceId, subResourceName, subResourceId);
+}
+
+module.exports = BlueprintAction;

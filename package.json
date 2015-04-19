@@ -18,8 +18,8 @@
     "url": "https://github.com/yahoo/dispatchr/blob/master/LICENSE.md"
   }],
   "dependencies": {
-    "debug": "^2.0.0",
-    "eventemitter3": "^0.1.6",
+    "debug": "2.x.x",
+    "eventemitter3": "0.x.x",
     "inherits": "^2.0.1",
     "superagent": "0.x.x"
   },
