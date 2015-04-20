@@ -2,11 +2,11 @@
 
 /**
  * React mixin for staticly declaring and add/remove-ing listeners for Store events.
- * @class FluxibleMixin
+ * @class ListenerMixin
  * @example
  * // Register listener default handler function name
  * var Component = React.createClass({
- *     mixins: [FluxibleMixin],
+ *     mixins: [ListenerMixin],
  *     statics: {
  *         storeListeners: [FooStore]
  *     },
@@ -18,7 +18,7 @@
  * @example
  * // Register listener with custom named handler
  * var Component = React.createClass({
- *     mixins: [FluxibleMixin],
+ *     mixins: [ListenerMixin],
  *     statics: {
  *         storeListeners: {
  *             'onChange2': [FooStore]
@@ -33,7 +33,7 @@
 var DEFAULT_CHANGE_HANDLER = 'onChange';
 var React = require('react');
 
-var FluxibleMixin = {
+var ListenerMixin = {
 
     /**
      * Registers staticly declared listeners
@@ -165,4 +165,4 @@ var FluxibleMixin = {
     }
 };
 
-module.exports = FluxibleMixin;
+module.exports = ListenerMixin;
