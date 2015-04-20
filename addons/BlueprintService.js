@@ -6,7 +6,7 @@ var Promise = require('bluebird'),
 
     // default response handler
     defaultResponseHandler = function(resolve, reject, err, res) {
-        if (err) return resolve(err);
+        if (err) return reject(this.parseError(err));
 
         var parsed = this.parseResponse(res);
 
@@ -32,8 +32,14 @@ BlueprintService.prototype.getPK = function() {
     return "id";
 }
 
+
+BlueprintService.prototype.parseError = function(err) {
+    return err;
+}
+
 BlueprintService.prototype.parseResponse = function(response) {
     var parsed = {};
+    console.log("response is: ", response);
     // success
     if (response.status >= 200 && response.status < 300) {
         parsed[this.getResourceName()] = response.body;
