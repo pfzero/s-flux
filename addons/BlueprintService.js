@@ -39,7 +39,6 @@ BlueprintService.prototype.parseError = function(err) {
 
 BlueprintService.prototype.parseResponse = function(response) {
     var parsed = {};
-    console.log("response is: ", response);
     // success
     if (response.status >= 200 && response.status < 300) {
         parsed[this.getResourceName()] = response.body;
