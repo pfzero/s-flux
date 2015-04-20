@@ -39,6 +39,9 @@ var genericActionCreator = function(ctx, constants, apiFn) {
 
     return apiFn.apply(null, args)
         .then(function(res) {
+
+            blueprintActionDebug("dispatching...", constants.success);
+
             ctx.dispatch(constants.success, {
                 givenInput: givenInput,
                 res: res
@@ -46,6 +49,9 @@ var genericActionCreator = function(ctx, constants, apiFn) {
             ctx.dispatch(constants.complete);
         })
         .catch(function(err) {
+
+            blueprintActionDebug("dispatching...", constants.error);
+
             ctx.dispatch(constants.error, {
                 givenInput: givenInput,
                 err: err
