@@ -420,6 +420,24 @@ BlueprintStore.prototype.GetById = function(id) {
 	});
 }
 
+BlueprintStore.prototype.GetBy = function(filterObject) {
+	var allItems = this.GetAll(),
+		keys = Object.keys(filterObject || {});
+
+	// perform a filter based on given
+	// filterObject
+	return allItems.filter(function(item) {
+		var found = true;
+		keys.forEach(function(key) {
+			if (item.get(key) !== filterObject[key]) {
+				found = false;
+			}
+		});
+
+		return found;
+	});
+};
+
 BlueprintStore.prototype.GetLastSearch = function() {
 	return this.lastSearch;
 }
