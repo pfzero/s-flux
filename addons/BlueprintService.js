@@ -13,6 +13,23 @@ var Promise = require('bluebird'),
         if (parsed.hasError) return reject(parsed);
 
         return resolve(parsed);
+    },
+
+    // parse query
+    parseQuery = function(query) {
+        var parsedQuery = {},
+            qKeys = Object.keys(query || {});
+
+        qKeys.forEach(function(searchKey) {
+            var searchValue = query[searchKey];
+            if (typeof searchValue === 'object') {
+                parsedQuery[searchKey] = JSON.stringify(searchValue);
+            } else {
+                parsedQuery[searchKey] = searchValue;
+            }
+        });
+
+        return parsedQuery
     };
 
 function BlueprintService(opts) {
@@ -75,63 +92,64 @@ BlueprintService.prototype.parseResponse = function(response) {
     return parsed;
 }
 
-BlueprintService.prototype.Create = function(request, data) {
+BlueprintService.prototype.Create = function(request, data, query) {
+
+    var parsedQuery = parseQuery(query);
+
     return new Promise(function(resolve, reject) {
         request("POST", this.getResourceName())
             .send(data)
+            .query(parsedQuery)
             .end(defaultResponseHandler.bind(this, resolve, reject));
     }.bind(this));
 };
 
-BlueprintService.prototype.Update = function(request, resourceId, data) {
-    var uri = this.getResourceName() + "/" + resourceId;
+BlueprintService.prototype.Update = function(request, resourceId, data, query) {
+    var uri = this.getResourceName() + "/" + resourceId,
+        parsedQuery = parseQuery(query);
 
     return new Promise(function(resolve, reject) {
         request("PUT", uri)
             .send(data)
+            .query(parsedQuery)
             .end(defaultResponseHandler.bind(this, resolve, reject));
     }.bind(this));
 };
 
 // alias Update
-BlueprintService.prototype.Batch = function(request, resourceId, data) {
-    return this.Update(resourceId, data);
+BlueprintService.prototype.Batch = function(request, resourceId, data, query) {
+    return this.Update(request, resourceId, data, query);
 };
 
-BlueprintService.prototype.Delete = function(request, resourceId) {
-    var uri = this.getResourceName() + "/" + resourceId;
+BlueprintService.prototype.Delete = function(request, resourceId, query) {
+    var uri = this.getResourceName() + "/" + resourceId,
+        parsedQuery = parseQuery(query);
 
     return new Promise(function(resolve, reject) {
         request("DELETE", uri)
+            .query(parsedQuery)
             .end(defaultResponseHandler.bind(this, resolve, reject));
     }.bind(this));
 }
 
-BlueprintService.prototype.GetById = function(request, resourceId) {
-    var uri = this.getResourceName() + "/" + resourceId;
+BlueprintService.prototype.GetById = function(request, resourceId, query) {
+    var uri = this.getResourceName() + "/" + resourceId,
+        parsedQuery = parseQuery(query);
 
     return new Promise(function(resolve, reject) {
         request("GET", uri)
+            .query(query)
             .end(defaultResponseHandler.bind(this, resolve, reject));
     }.bind(this));
 }
 
-BlueprintService.prototype.GetBy = function(request, fields) {
+BlueprintService.prototype.GetBy = function(request, fields, query) {
     return this.Find(request, fields);
 }
 
 BlueprintService.prototype.Find = function(request, query) {
-    var parsedQuery = {},
-        qKeys = Object.keys(query);
 
-    qKeys.forEach(function(searchKey) {
-        var searchValue = query[searchKey];
-        if (typeof searchValue === 'object') {
-            parsedQuery[searchKey] = JSON.stringify(searchValue);
-        } else {
-            parsedQuery[searchKey] = searchValue;
-        }
-    });
+    var parsedQuery = parseQuery(query);
 
     return new Promise(function(resolve, reject) {
         request("GET", this.getResourceName())
@@ -140,28 +158,36 @@ BlueprintService.prototype.Find = function(request, query) {
     }.bind(this));
 }
 
-BlueprintService.prototype.AddTo = function(request, resourceId, subResource, subResourceData) {
-    var uri = this.getResourceName() + "/" + resourceId + "/" + subResource;
+BlueprintService.prototype.AddTo = function(request, resourceId, subResource, subResourceData, query) {
+    var uri = this.getResourceName() + "/" + resourceId + "/" + subResource,
+        parsedQuery = parseQuery(query);
 
     return new Promise(function(resolve, reject) {
-        request('POST', uri).send(subResourceData).end(defaultResponseHandler.bind(this, resolve, reject));
-    }.bind(this));
-}
-
-BlueprintService.prototype.Link = function(request, resourceId, subResource, subResourceId) {
-    var uri = this.getResourceName() + "/" + resourceId + "/" + subResource + "/" + subResourceId;
-
-    return new Promise(function(resolve, reject) {
-        request("GET", uri)
+        request('POST', uri)
+            .send(subResourceData)
+            .query(parsedQuery)
             .end(defaultResponseHandler.bind(this, resolve, reject));
     }.bind(this));
 }
 
-BlueprintService.prototype.UnLink = function(request, resourceId, subResource, subResourceId) {
-    var uri = this.getResourceName() + "/" + resourceId + "/" + subResource + "/" + subResourceId;
+BlueprintService.prototype.Link = function(request, resourceId, subResource, subResourceId, query) {
+    var uri = this.getResourceName() + "/" + resourceId + "/" + subResource + "/" + subResourceId,
+        parsedQuery = parseQuery(query);
+
+    return new Promise(function(resolve, reject) {
+        request("GET", uri)
+            .query(parsedQuery)
+            .end(defaultResponseHandler.bind(this, resolve, reject));
+    }.bind(this));
+}
+
+BlueprintService.prototype.UnLink = function(request, resourceId, subResource, subResourceId, query) {
+    var uri = this.getResourceName() + "/" + resourceId + "/" + subResource + "/" + subResourceId,
+        parsedQuery = parseQuery(query);
 
     return new Promise(function(resolve, reject) {
         request("DELETE", uri)
+            .query(parsedQuery)
             .end(defaultResponseHandler.bind(this, resolve, reject));
     }.bind(this));
 }

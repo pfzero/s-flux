@@ -360,7 +360,7 @@ function BlueprintStore(dispatcher, opts) {
 		throw new TypeError("given resourceName is required and must identify a resource on your server api. (e.g. users)");
 	}
 
-	var resourceName = opts.resourceName;
+	var resourceName = opts.resourceName.toLowerCase();
 
 	BaseStore.call(this, dispatcher);
 
