@@ -1,5 +1,5 @@
 var blueprintActionDebug = require('debug')("app:flux:actions:BlueprintAction"),
-    getActionConstants = require('./getActionConstants'),
+    getActionConstants = require('../constants/getActionConstants'),
     BlueprintService = require('./BlueprintService');
 
 
@@ -46,7 +46,6 @@ var genericActionCreator = function(ctx, constants, apiFn) {
                 givenInput: givenInput,
                 res: res
             });
-            ctx.dispatch(constants.complete);
         })
         .catch(function(err) {
 
@@ -56,7 +55,6 @@ var genericActionCreator = function(ctx, constants, apiFn) {
                 givenInput: givenInput,
                 err: err
             });
-            ctx.dispatch(constants.complete);
         });
 };
 

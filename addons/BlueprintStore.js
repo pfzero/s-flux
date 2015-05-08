@@ -5,7 +5,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 	inherits = require('inherits'),
 	BaseStore = require('./BaseStore'),
 	Backup = require('./Backup'),
-	getActionConstants = require('./getActionConstants'),
+	getActionConstants = require('../constants/getActionConstants'),
 
 	// return handlers for the blueprint store;
 	// it implements the dispatcher functions for
