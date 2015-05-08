@@ -28,7 +28,7 @@ var genericActionCreator = function(ctx, constants, apiFn) {
         givenInput.push(arguments[i]);
     };
 
-    args = givenInput;
+    args = givenInput.slice();
     args.unshift(ctx.getBaseRequest());
 
     blueprintActionDebug("dispatching...", constants.base);
