@@ -237,15 +237,16 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 		 */
 		dispatchHandlersNS.GetBy = function(payload) {
 			var imList = Im.List(Im.fromJS(payload.res[this.getResourceName()])),
-				newCollection = this.GetAll();
+				oldCollection = this.GetAll(),
+				newCollection;
 
 			imList.forEach(function(item) {
 				var id = item.get('id'),
-					existingIndex = this.GetAll().findIndex(function(oldItem) {
+					existingIndex = oldCollection.findIndex(function(oldItem) {
 						return oldItem.get('id') === id;
 					});
 
-				newCollection = newCollection.set(existingIndex, item);
+				newCollection = oldCollection.set(existingIndex, item);
 			});
 
 			this.entities = newCollection;
