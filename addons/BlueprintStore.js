@@ -361,7 +361,7 @@ function BlueprintStore(dispatcher, opts) {
 		throw new TypeError("given resourceName is required and must identify a resource on your server api. (e.g. users)");
 	}
 
-	var resourceName = opts.resourceName;
+	var resourceName = opts.resourceName.toLowerCase();
 
 	BaseStore.call(this, dispatcher);
 
@@ -421,6 +421,24 @@ BlueprintStore.prototype.GetById = function(id) {
 		return entity.get(self.getPK()) === id;
 	});
 }
+
+BlueprintStore.prototype.GetBy = function(filterObject) {
+	var allItems = this.GetAll(),
+		keys = Object.keys(filterObject || {});
+
+	// perform a filter based on given
+	// filterObject
+	return allItems.filter(function(item) {
+		var found = true;
+		keys.forEach(function(key) {
+			if (item.get(key) !== filterObject[key]) {
+				found = false;
+			}
+		});
+
+		return found;
+	});
+};
 
 BlueprintStore.prototype.GetLastSearch = function() {
 	return this.lastSearch;

@@ -28,7 +28,7 @@ var genericActionCreator = function(ctx, constants, apiFn) {
         givenInput.push(arguments[i]);
     };
 
-    args = givenInput;
+    args = givenInput.slice();
     args.unshift(ctx.getBaseRequest());
 
     blueprintActionDebug("dispatching...", constants.base);
@@ -166,40 +166,40 @@ BlueprintAction.prototype.BaseAction = function(action, ctx) {
     return genericActionCreator.apply(null, args);
 }
 
-BlueprintAction.prototype.Create = function(ctx, resourceData) {
-    return this.BaseAction("Create", ctx, resourceData);
+BlueprintAction.prototype.Create = function(ctx, resourceData, query) {
+    return this.BaseAction("Create", ctx, resourceData, query);
 }
 
-BlueprintAction.prototype.Update = function(ctx, resourceId, resourceData) {
-    return this.BaseAction("Update", ctx, resourceId, resourceData);
+BlueprintAction.prototype.Update = function(ctx, resourceId, resourceData, query) {
+    return this.BaseAction("Update", ctx, resourceId, resourceData, query);
 }
 
-BlueprintAction.prototype.GetById = function(ctx, resourceId) {
-    return this.BaseAction("GetById", ctx, resourceId);
+BlueprintAction.prototype.GetById = function(ctx, resourceId, query) {
+    return this.BaseAction("GetById", ctx, resourceId, query);
 }
 
-BlueprintAction.prototype.GetBy = function(ctx, fields) {
-    return this.BaseAction("GetBy", ctx, fields);
+BlueprintAction.prototype.GetBy = function(ctx, fields, query) {
+    return this.BaseAction("GetBy", ctx, fields, query);
 }
 
-BlueprintAction.prototype.Delete = function(ctx, resourceId) {
-    return this.BaseAction("Delete", ctx, resourceId);
+BlueprintAction.prototype.Delete = function(ctx, resourceId, query) {
+    return this.BaseAction("Delete", ctx, resourceId, query);
 }
 
 BlueprintAction.prototype.Find = function(ctx, query) {
     return this.BaseAction("Find", ctx, query);
 }
 
-BlueprintAction.prototype.AddTo = function(ctx, resourceId, subResourceName, subResourceData) {
-    return this.BaseAction("AddTo", ctx, resourceId, subResourceName, subResourceData);
+BlueprintAction.prototype.AddTo = function(ctx, resourceId, subResourceName, subResourceData, query) {
+    return this.BaseAction("AddTo", ctx, resourceId, subResourceName, subResourceData, query);
 }
 
-BlueprintAction.prototype.Link = function(ctx, resourceId, subResourceName, subResourceId) {
-    return this.BaseAction("Link", ctx, resourceId, subResourceName, subResourceId);
+BlueprintAction.prototype.Link = function(ctx, resourceId, subResourceName, subResourceId, query) {
+    return this.BaseAction("Link", ctx, resourceId, subResourceName, subResourceId, query);
 }
 
-BlueprintAction.prototype.UnLink = function(ctx, resourceId, subResourceName, subResourceId) {
-    return this.BaseAction("UnLink", ctx, resourceId, subResourceName, subResourceId);
+BlueprintAction.prototype.UnLink = function(ctx, resourceId, subResourceName, subResourceId, query) {
+    return this.BaseAction("UnLink", ctx, resourceId, subResourceName, subResourceId, query);
 }
 
 module.exports = BlueprintAction;
