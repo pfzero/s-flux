@@ -416,8 +416,9 @@ BlueprintStore.prototype.GetAll = function() {
 }
 
 BlueprintStore.prototype.GetById = function(id) {
+	var self = this;
 	return this.entities.find(function(entity) {
-		return entity.get(this.getPK()) === id;
+		return entity.get(self.getPK()) === id;
 	});
 }
 
