@@ -29,7 +29,8 @@ var storeDebug = require('debug')("app:flux:Stores:NotificationsStore"),
             return false;
         }
 
-        var actionType = actionParts.pop();
+        var actionType = actionParts.pop(),
+            resourceName = ;
 
         // now check if we have a relevant error (e.g. if we didn't found a resource)
         // we should just display some Not Found page, not display a message;
@@ -38,45 +39,11 @@ var storeDebug = require('debug')("app:flux:Stores:NotificationsStore"),
         }
 
 
+        // store the base action (e.g. USER_CREATE)
         processedPayload.baseAction = actionType;
-        // now process payload
-        switch (actionType) {
 
-            // create
-            case RELEVANT_ACTIONS[0]:
-                processedPayload.userInput = payload.givenInput[0];
-                processedPayload.error = payload.err;
-                break;
-
-                // update
-            case RELEVANT_ACTIONS[1]:
-                processedPayload.resourceId = payload.givenInput[0];
-                processedPayload.userInput = payload.givenInput[1];
-                processedPayload.error = payload.err;
-                break;
-
-                // delete
-            case RELEVANT_ACTIONS[2]:
-                processedPayload.resourceId = payload.givenInput[0];
-                processedPayload.error = payload.err;
-                break;
-
-                // addTo
-            case RELEVANT_ACTIONS[3]:
-                processedPayload.resourceId = payload.givenInput[0];
-                processedPayload.subResourceName = payload.givenInput[1];
-                processedPayload.userInput = payload.givenInput[2];
-                break;
-
-                // link
-                // case unlink
-            case RELEVANT_ACTIONS[4]:
-            case RELEVANT_ACTIONS[5]:
-                processedPayload.resourceId = payload.givenInput[0];
-                processedPayload.subResourceName = payload.givenInput[1];
-                processedPayload.subResourceId = payload.givenInput[2];
-                break;
-        }
+        // store the type (e.g. SUCCESS or ERROR)
+        processedPayload.type = endsWith;
 
         return processedPayload;
     };
