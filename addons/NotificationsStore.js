@@ -29,8 +29,7 @@ var storeDebug = require('debug')("app:flux:Stores:NotificationsStore"),
             return false;
         }
 
-        var actionType = actionParts.pop(),
-            resourceName = ;
+        var actionType = actionParts.pop();
 
         // now check if we have a relevant error (e.g. if we didn't found a resource)
         // we should just display some Not Found page, not display a message;
@@ -101,7 +100,7 @@ NotificationsStore.prototype.GetByType = function(type) {
  * @public
  * @return {Im.List}           the list of notifications
  */
-NotificationsStore.prototype.GetAll = function(arguments) {
+NotificationsStore.prototype.GetAll = function() {
     return this.notifications;
 }
 

@@ -22,7 +22,8 @@
     "eventemitter3": "0.x.x",
     "inherits": "2.x.x",
     "superagent": "0.x.x",
-    "bluebird": "2.x.x"
+    "bluebird": "2.x.x",
+    "immutable": "3.x.x"
   },
   "devDependencies": {
     "chai": "^1.9.1",
