@@ -188,8 +188,19 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 				updatedIndex = this.GetAll().findIndex(function(item) {
 					return item.get('id') === resourceId;
 				}),
-				newCollection = this.GetAll().set(updatedIndex, backupResource);
+				oldCollection = this.GetAll(),
+				newCollection;
 
+			// if no backup was found
+			// nothing to do
+			if (!backupResource) {
+				return;
+			}
+
+			// add the item from backup in the new set
+			newCollection = oldCollection.set(updatedIndex, backupResource);
+
+			// removed the item from backup store
 			this.backup.Remove(resourceId);
 
 			this.entities = newCollection;
@@ -290,11 +301,23 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 				index = this.GetAll().findIndex(function(item) {
 					return item.get('id') === resourceId;
 				}),
-				bk = this.backup.Add(resourceId, {
-					resource: resource,
-					index: index
-				}),
-				newCollection = this.GetAll().delete(index);
+				oldCollection = this.GetAll(),
+				bk;
+
+			// nothing found in store
+			// nothing to do
+			if (index === -1) {
+				return;
+			}
+
+			// store old item in backup
+			this.backup.Add(resourceId, {
+				resource: resource,
+				index: index
+			});
+
+			// remove the item from collection
+			newCollection = oldCollection.delete(index);
 
 			this.entities = newCollection;
 
@@ -311,13 +334,26 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 		 */
 		dispatchHandlersNS.DeleteError = function(payload) {
 			var resourceId = payload.givenInput[0],
-				index = this.backup.Get(resourceId).index,
-				resource = this.backup.Get(resourceId).resource,
-				newCollection = this.GetAll().splice(index, 0, resource);
+				bk = this.backup.Get(resourceId),
+				oldCollection = this.GetAll();
+
+			// if the item not found in
+			// backup (i.e. the item was not found in the store
+			// first time), do nothing
+			if(!bk) {
+				return;
+			}
+
+			// add back the item to the exact
+			// same position in the list
+			newCollection = oldCollection.splice(bk.index, 0, bk.resource);
 
 			this.entities = newCollection;
 
+			// clean the backup
 			this.backup.Remove(resourceId);
+
+			// done
 			this.emitChange();
 		};
 
