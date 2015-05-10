@@ -89,7 +89,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 		dispatchHandlersNS.Create = function(payload) {
 			var resource = payload.res[this.getResourceName()],
 				imResource = Im.fromJS(resource),
-				newCollection = this.GetAll().add(imResource);
+				newCollection = this.GetAll().push(imResource);
 
 			this.entities = newCollection;
 
