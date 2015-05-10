@@ -158,7 +158,7 @@ ErrorStore.handlers = {
         // transform to immutable
         parsed = Im.fromJS(parsed);
 
-        this.errors.push(parsed);
+        this.errors = this.errors.push(parsed);
 
         this.emitChange();
     },

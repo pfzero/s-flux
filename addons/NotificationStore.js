@@ -126,7 +126,7 @@ NotificationStore.handlers = {
         // transform to immutable
         parsed = Im.fromJS(parsed);
 
-        this.notifications.push(parsed);
+        this.notifications = this.notifications.push(parsed);
 
         this.emitChange();
     },
