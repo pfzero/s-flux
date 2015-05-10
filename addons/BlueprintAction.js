@@ -53,7 +53,7 @@ var genericActionCreator = function(ctx, constants, apiFn) {
 
             ctx.dispatch(constants.error, {
                 givenInput: givenInput,
-                err: err
+                error: err
             });
         });
 };

@@ -265,7 +265,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 		 *                         }
 		 */
 		dispatchHandlersNS.Delete = function(payload) {
-			var resourceId = payload.givenInput;
+			var resourceId = payload.givenInput[0];
 
 			// just clear the backup
 			this.backup.Remove(resourceId);
@@ -285,7 +285,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 		 *                         }
 		 */
 		dispatchHandlersNS.DeleteOptimistic = function(payload) {
-			var resourceId = payload.givenInput,
+			var resourceId = payload.givenInput[0],
 				resource = this.GetById(resourceId),
 				index = this.GetAll().findIndex(function(item) {
 					return item.get('id') === resourceId;
@@ -310,7 +310,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 		 * @param {Object} payload **SAME AS DeleteOptimistic from above**
 		 */
 		dispatchHandlersNS.DeleteError = function(payload) {
-			var resourceId = payload.givenInput,
+			var resourceId = payload.givenInput[0],
 				index = this.backup.Get(resourceId).index,
 				resource = this.backup.Get(resourceId).resource,
 				newCollection = this.GetAll().splice(index, 0, resource);
