@@ -101,7 +101,7 @@ NotificationsStore.prototype.GetByType = function(type) {
  * @public
  * @return {Im.List}           the list of notifications
  */
-NotificationsStore.prototype.GetAll() = function(arguments) {
+NotificationsStore.prototype.GetAll = function(arguments) {
     return this.notifications;
 }
 

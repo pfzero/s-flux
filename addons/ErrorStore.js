@@ -132,7 +132,7 @@ ErrorStore.prototype.GetByType = function(type) {
  * @public
  * @return {Im.List}           the list of errors
  */
-ErrorStore.prototype.GetAll() = function(arguments) {
+ErrorStore.prototype.GetAll = function() {
     return this.errors;
 }
 
