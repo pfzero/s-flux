@@ -4,7 +4,7 @@ var IDENTIFIERS = ["SUCCESS", "ERROR"];
 
 var RELEVANT_ACTIONS = ["CREATE", "UPDATE", "DELETE", "ADDTO", "LINK", "UNLINK"];
 
-var storeDebug = require('debug')("app:flux:Stores:NotificationsStore"),
+var storeDebug = require('debug')("app:flux:Stores:NotificationStore"),
     Im = require('immutable'),
     inherits = require('inherits'),
     BaseStore = require('./BaseStore'),
@@ -55,7 +55,7 @@ var storeDebug = require('debug')("app:flux:Stores:NotificationsStore"),
  * @constructor
  * @param {Object} dispatcher the dispatcher
  */
-function NotificationsStore(dispatcher) {
+function NotificationStore(dispatcher) {
 
     // exstends BaseStore
     BaseStore.call(this, dispatcher);
@@ -67,25 +67,25 @@ function NotificationsStore(dispatcher) {
     this.notifications = Im.List();
 };
 
-// NotificationsStore extends BaseStore
-inherits(NotificationsStore, BaseStore);
+// NotificationStore extends BaseStore
+inherits(NotificationStore, BaseStore);
 
 
 // parse the error payload
 // received from server
-NotificationsStore.prototype.parseAction = function(payload, actionName) {
+NotificationStore.prototype.parseAction = function(payload, actionName) {
     return processHandlerArgs.bind(this)(payload, actionName);
 }
 
 // generate unique id
-NotificationsStore.prototype.generateId = generateUniqueId;
+NotificationStore.prototype.generateId = generateUniqueId;
 
 /**
  * Returns the error based on actionType (e.g. user_create)
  * @public
  * @param {Im.Map} type the found error
  */
-NotificationsStore.prototype.GetByType = function(type) {
+NotificationStore.prototype.GetByType = function(type) {
     var notifications = this.GetAll();
 
     return notifications.find(function(err) {
@@ -100,12 +100,12 @@ NotificationsStore.prototype.GetByType = function(type) {
  * @public
  * @return {Im.List}           the list of notifications
  */
-NotificationsStore.prototype.GetAll = function() {
+NotificationStore.prototype.GetAll = function() {
     return this.notifications;
 }
 
 // handlers 
-NotificationsStore.handlers = {
+NotificationStore.handlers = {
 
     // this handler will receive all the actions
     // flowing through dispatcher, regardless of them being
@@ -143,4 +143,4 @@ NotificationsStore.handlers = {
     }
 };
 
-module.exports = NotificationsStore;
+module.exports = NotificationStore;
