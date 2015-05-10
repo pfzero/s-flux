@@ -29,7 +29,7 @@ var storeDebug = require('debug')("app:flux:Stores:NotificationStore"),
             return false;
         }
 
-        var actionType = actionParts.pop();
+        var actionType = actionParts.pop().toUpperCase();
 
         // now check if we have a relevant error (e.g. if we didn't found a resource)
         // we should just display some Not Found page, not display a message;
