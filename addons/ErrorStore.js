@@ -16,7 +16,7 @@ var storeDebug = require('debug')("app:flux:Stores:ErrorStore"),
     processHandlerArgs = function(payload, actionName) {
         var actionParts = actionName.toUpperCase().split("_"),
             endsWith = actionParts.pop(),
-            baseError = actionParts.join("_"),
+            baseAction = actionParts.join("_"),
             processedPayload = {},
             ERROR_IDENTIFIER = this._ERROR_IDENTIFIER,
             RELEVANT_ERRORS = this._RELEVANT_ERRORS;
@@ -37,27 +37,28 @@ var storeDebug = require('debug')("app:flux:Stores:ErrorStore"),
         }
 
 
-        processedPayload.baseAction = actionType;
+        processedPayload.baseAction = baseAction;
+
         // now process payload
         switch (actionType) {
 
             // create
             case RELEVANT_ERRORS[0]:
                 processedPayload.userInput = payload.givenInput[0];
-                processedPayload.error = payload.err;
+                processedPayload.error = payload.error;
                 break;
 
                 // update
             case RELEVANT_ERRORS[1]:
                 processedPayload.resourceId = payload.givenInput[0];
                 processedPayload.userInput = payload.givenInput[1];
-                processedPayload.error = payload.err;
+                processedPayload.error = payload.error;
                 break;
 
                 // delete
             case RELEVANT_ERRORS[2]:
                 processedPayload.resourceId = payload.givenInput[0];
-                processedPayload.error = payload.err;
+                processedPayload.error = payload.error;
                 break;
 
                 // addTo
@@ -65,6 +66,7 @@ var storeDebug = require('debug')("app:flux:Stores:ErrorStore"),
                 processedPayload.resourceId = payload.givenInput[0];
                 processedPayload.subResourceName = payload.givenInput[1];
                 processedPayload.userInput = payload.givenInput[2];
+                processedPayload.error = payload.error;
                 break;
 
                 // link
@@ -74,6 +76,7 @@ var storeDebug = require('debug')("app:flux:Stores:ErrorStore"),
                 processedPayload.resourceId = payload.givenInput[0];
                 processedPayload.subResourceName = payload.givenInput[1];
                 processedPayload.subResourceId = payload.givenInput[2];
+                processedPayload.error = payload.error;
                 break;
         }
 

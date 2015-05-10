@@ -17,7 +17,7 @@ var storeDebug = require('debug')("app:flux:Stores:NotificationStore"),
     processHandlerArgs = function(payload, actionName) {
         var actionParts = actionName.toUpperCase().split("_"),
             endsWith = actionParts.pop(),
-            baseError = actionParts.join("_"),
+            baseAction = actionParts.join("_"),
             processedPayload = {},
             IDENTIFIERS = this._IDENTIFIERS,
             RELEVANT_ACTIONS = this._RELEVANT_ACTIONS;
@@ -39,7 +39,7 @@ var storeDebug = require('debug')("app:flux:Stores:NotificationStore"),
 
 
         // store the base action (e.g. USER_CREATE)
-        processedPayload.baseAction = actionType;
+        processedPayload.baseAction = baseAction;
 
         // store the type (e.g. SUCCESS or ERROR)
         processedPayload.type = endsWith;
