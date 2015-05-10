@@ -2,62 +2,6 @@ var blueprintActionDebug = require('debug')("app:flux:actions:BlueprintAction"),
     getActionConstants = require('../constants/getActionConstants'),
     BlueprintService = require('./BlueprintService');
 
-
-/**
- * genericActionCreator is the main function used
- * to create actions and dispatch to stores
- * @param  {Context} ctx       Fluxible Context
- * @param  {Object} constants  the constants object, it should contain
- *                             the properties: base, success, error
- *                             and complete
- *
- * @param  {Function} apiFn    the service function for communication
- *                             with server API
- *
- * @param  {Object} givenInput The received input from components
- * @return {Promise}           the resolved promise from service
- *                             function
- */
-var genericActionCreator = function(ctx, constants, apiFn) {
-
-    var givenInput = [],
-        args;
-
-    // drain arguments
-    for (var i = 3, _l = arguments.length; i < _l; i++) {
-        givenInput.push(arguments[i]);
-    };
-
-    args = givenInput.slice();
-    args.unshift(ctx.getBaseRequest());
-
-    blueprintActionDebug("dispatching...", constants.base);
-
-    ctx.dispatch(constants.base, {
-        givenInput: givenInput
-    });
-
-    return apiFn.apply(null, args)
-        .then(function(res) {
-
-            blueprintActionDebug("dispatching...", constants.success);
-
-            ctx.dispatch(constants.success, {
-                givenInput: givenInput,
-                res: res
-            });
-        })
-        .catch(function(err) {
-
-            blueprintActionDebug("dispatching...", constants.error);
-
-            ctx.dispatch(constants.error, {
-                givenInput: givenInput,
-                error: err
-            });
-        });
-};
-
 /**
  * BlueprintAction is the base class for creating
  * blueprint actions for a resource
@@ -156,14 +100,44 @@ function BlueprintAction(opts) {
 BlueprintAction.prototype.BaseAction = function(action, ctx) {
     var apiFn = this.getApiService()[action].bind(this.getApiService()),
         constants = getActionConstants(this.getResourceName(), action),
-        args = [ctx, constants, apiFn];
+        givenInput = [],
+        args;
 
-    // add the remaining arguments
+
+    // add the arguments to be sent
+    // to service
     for (var i = 2, _l = arguments.length; i < _l; i++) {
-        args.push(arguments[i]);
+        givenInput.push(arguments[i]);
     };
 
-    return genericActionCreator.apply(null, args);
+    args = givenInput.slice();
+    args.unshift(ctx.getBaseRequest());
+
+    blueprintActionDebug("dispatching...", constants.base);
+
+    ctx.dispatch(constants.base, {
+        givenInput: givenInput
+    });
+
+    return apiFn.apply(null, args)
+        .then(function(res) {
+
+            blueprintActionDebug("dispatching...", constants.success);
+
+            ctx.dispatch(constants.success, {
+                givenInput: givenInput,
+                res: res
+            });
+        })
+        .catch(function(err) {
+
+            blueprintActionDebug("dispatching...", constants.error);
+
+            ctx.dispatch(constants.error, {
+                givenInput: givenInput,
+                error: err
+            });
+        });
 }
 
 BlueprintAction.prototype.Create = function(ctx, resourceData, query) {
