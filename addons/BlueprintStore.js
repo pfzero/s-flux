@@ -248,8 +248,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 		 */
 		dispatchHandlersNS.GetBy = function(payload) {
 			var imList = Im.List(Im.fromJS(payload.res[this.getResourceName()])),
-				oldCollection = this.GetAll(),
-				newCollection;
+				oldCollection = this.GetAll();
 
 			imList.forEach(function(item) {
 				var id = item.get('id'),
@@ -257,10 +256,12 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 						return oldItem.get('id') === id;
 					});
 
-				newCollection = oldCollection.set(existingIndex, item);
+				// add each item received from server to the old collection
+				oldCollection = oldCollection.set(existingIndex, item);
 			});
 
-			this.entities = newCollection;
+			// update existing entities
+			this.entities = oldCollection;
 			this.emitChange();
 		};
 
