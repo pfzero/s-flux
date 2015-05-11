@@ -137,6 +137,9 @@ BlueprintAction.prototype.BaseAction = function(action, ctx) {
                 givenInput: givenInput,
                 error: err
             });
+
+            // bubble up
+            return Promise.reject();
         });
 }
 
