@@ -118,7 +118,18 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 				oldResourceIndex = this.GetAll().findIndex(function(item) {
 					return item.get('id') === resourceId;
 				}),
-				newCollection = this.GetAll().set(oldResourceIndex, imResource);
+				oldCollection = this.GetAll(),
+				newCollection;
+
+			// add to list if not found
+			if (oldResourceIndex === -1) {
+				newCollection = oldCollection.push(imResource);
+			}
+
+			// update the existing item
+			else {
+				newCollection = oldCollection.set(oldResourceIndex, imResource);
+			}
 
 			this.backup.Remove(resourceId);
 
@@ -152,7 +163,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 
 			// no resource found in the store
 			// so nothing to update.
-			if (!oldResource) {
+			if (oldResourceIndex === -1) {
 				return;
 			}
 
@@ -224,9 +235,20 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 				imResource = Im.fromJS(payload.res[this.getResourceName()]),
 				existingIndex = this.GetAll().findIndex(function(item) {
 					return item.get('id') === resourceId;
-				});
+				}),
+				oldCollection = this.GetAll(),
+				newCollection;
 
-			var newCollection = this.GetAll().set(existingIndex, imResource);
+			// just add
+			if (existingIndex === -1) {
+				newCollection = oldCollection.push(imResource);
+			}
+
+			// update
+			else {
+				newCollection = oldCollection.set(existingIndex, imResource);
+			}
+
 
 			this.entities = newCollection;
 			this.emitChange();
@@ -256,8 +278,16 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 						return oldItem.get('id') === id;
 					});
 
-				// add each item received from server to the old collection
-				oldCollection = oldCollection.set(existingIndex, item);
+
+				// push if not found
+				if (existingIndex === -1) {
+					oldCollection = oldCollection.push(item);
+				}
+
+				// update if found
+				else {
+					oldCollection = oldCollection.set(existingIndex, item);
+				}
 			});
 
 			// update existing entities
@@ -341,7 +371,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 			// if the item not found in
 			// backup (i.e. the item was not found in the store
 			// first time), do nothing
-			if(!bk) {
+			if (!bk) {
 				return;
 			}
 
