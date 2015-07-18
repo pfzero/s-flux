@@ -30,7 +30,7 @@ module.exports = {
 		var state = this.state,
 			parts = statePath.split('.'),
 			namespace = parts.shift(),
-			value = state,
+			value = state[namespace],
 			getNewValuePath = undefined;
 
 		parts.forEach(function (piece) {
