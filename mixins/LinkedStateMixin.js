@@ -27,7 +27,7 @@ module.exports = {
 	linkState: function (statePath) {
 		var state = this.state,
 			parts = statePath.split('.'),
-			namespace = parts[0],
+			namespace = parts.shift(),
 			value = state,
 			getNewValuePath = undefined;
 
@@ -48,8 +48,19 @@ module.exports = {
 		// 		}
 		// 	}
 		getNewValuePath = function (newVal) {
-			var constructedObj = state[namespace] || {},
-				internalPtr = constructedObj;
+			var constructedObj = {},
+				internalPtr;
+
+			constructedObj[namespace] = state[namespace] || {};
+
+			// if the value should be placed right in component's
+			// state, then just set the value and return
+			if (parts.length === 0) {
+				constructedObj[namespace] = newVal;
+				return constructedObj;
+			}
+
+			internalPtr = constructedObj[namespace];
 
 			parts.forEach(function (piece, pieceIndex) {
 				// if it's the last piece
@@ -60,7 +71,7 @@ module.exports = {
 
 				// mutate the constructedObj via
 				// internalPtr object
-				internalPtr[piece] = {};
+				internalPtr[piece] = internalPtr[piece] || {};
 				internalPtr = internalPtr[piece];
 			});
 
