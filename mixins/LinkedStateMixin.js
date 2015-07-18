@@ -24,13 +24,14 @@ module.exports = {
 	 * @param  <String> statePath the path in the state object containing the input's value
 	 * @return <Object>
 	 */
-	linkState: function(statePath) {
+	linkState: function (statePath) {
 		var state = this.state,
 			parts = statePath.split('.'),
+			namespace = parts[0],
 			value = state,
 			getNewValuePath = undefined;
 
-		parts.forEach(function(piece) {
+		parts.forEach(function (piece) {
 			value = value[piece];
 		});
 
@@ -46,11 +47,11 @@ module.exports = {
 		// 			}
 		// 		}
 		// 	}
-		getNewValuePath = function(newVal) {
-			var constructedObj = {},
+		getNewValuePath = function (newVal) {
+			var constructedObj = state[namespace] || {},
 				internalPtr = constructedObj;
 
-			parts.forEach(function(piece, pieceIndex) {
+			parts.forEach(function (piece, pieceIndex) {
 				// if it's the last piece
 				if (pieceIndex === parts.length - 1) {
 					internalPtr[piece] = newVal;
@@ -73,7 +74,7 @@ module.exports = {
 		// }
 		return {
 			value: value,
-			requestChange: function(newVal) {
+			requestChange: function (newVal) {
 				this.setState(getNewValuePath(newVal));
 			}.bind(this),
 		}
