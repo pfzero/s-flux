@@ -1,5 +1,7 @@
 'use strict';
 
+var _ = require('lodash');
+
 /**
  * LinkedStateMixin
  */
@@ -51,7 +53,7 @@ module.exports = {
 			var constructedObj = {},
 				internalPtr;
 
-			constructedObj[namespace] = state[namespace] || {};
+			constructedObj[namespace] = _.cloneDeep(state[namespace]) || {};
 
 			// if the value should be placed right in component's
 			// state, then just set the value and return
