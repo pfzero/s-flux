@@ -192,4 +192,7 @@ BlueprintService.prototype.UnLink = function (request, resourceId, subResource, 
     }.bind(this));
 }
 
+// export the defaultResponseHandler as well
+BlueprintService.defaultResponseHandler = defaultResponseHandler;
+
 module.exports = BlueprintService;
