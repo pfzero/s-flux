@@ -334,6 +334,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 					return item.get('id') === resourceId;
 				}),
 				oldCollection = this.GetAll(),
+				newCollection,
 				bk;
 
 			// nothing found in store
@@ -367,7 +368,8 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 		dispatchHandlersNS.DeleteError = function(payload) {
 			var resourceId = payload.givenInput[0],
 				bk = this.backup.Get(resourceId),
-				oldCollection = this.GetAll();
+				oldCollection = this.GetAll(),
+				newCollection;
 
 			// if the item not found in
 			// backup (i.e. the item was not found in the store
