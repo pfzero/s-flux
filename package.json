@@ -26,6 +26,7 @@
     "immutable": "3.x.x",
     "inherits": "2.x.x",
     "lodash": "3.x.x",
+    "setimmediate": "1.x.x",
     "superagent": "0.x.x"
   },
   "devDependencies": {

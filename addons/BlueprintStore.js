@@ -3,6 +3,7 @@
 var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 	Im = require('immutable'),
 	inherits = require('inherits'),
+	setImmediate = require('setimmediate'),
 	BaseStore = require('./BaseStore'),
 	Backup = require('./Backup'),
 	getActionConstants = require('../constants/getActionConstants'),
@@ -93,7 +94,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 
 			this.entities = newCollection;
 
-			this.emitChange();
+			this.emitChangeAsync();
 		};
 
 		/**
@@ -135,7 +136,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 
 			this.entities = newCollection;
 
-			this.emitChange();
+			this.emitChangeAsync();
 		};
 
 
@@ -174,7 +175,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 
 			this.entities = newCollection;
 
-			this.emitChange();
+			this.emitChangeAsync();
 		};
 
 		/**
@@ -216,7 +217,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 
 			this.entities = newCollection;
 
-			this.emitChange();
+			this.emitChangeAsync();
 		};
 
 		/**
@@ -251,7 +252,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 
 
 			this.entities = newCollection;
-			this.emitChange();
+			this.emitChangeAsync();
 		};
 
 
@@ -292,7 +293,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 
 			// update existing entities
 			this.entities = oldCollection;
-			this.emitChange();
+			this.emitChangeAsync();
 		};
 
 		/**
@@ -352,7 +353,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 
 			this.entities = newCollection;
 
-			this.emitChange();
+			this.emitChangeAsync();
 		};
 
 		/**
@@ -385,7 +386,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 			this.backup.Remove(resourceId);
 
 			// done
-			this.emitChange();
+			this.emitChangeAsync();
 		};
 
 		/**
@@ -406,7 +407,7 @@ var storeDebug = require('debug')("app:flux:Stores:BlueprintStore"),
 			var imList = Im.List(Im.fromJS(payload.res[this.getResourceName()]));
 
 			this.lastSearch = imList;
-			this.emitChange();
+			this.emitChangeAsync();
 		};
 
 		dispatchHandlersNS.AddTo = function(payload) {};
@@ -458,6 +459,18 @@ BlueprintStore.prototype.dehydrate = function() {
 		lastSearch: this.GetLastSearch().toJS(),
 		entities: this.GetAll().toJS()
 	};
+}
+
+/**
+ * emitChange async, so we don't mess up component updates and errors
+ * with store dispatching, resulting in wrong functionality
+ */
+BlueprintStore.prototype.emitChangeAsync = function () {
+	var self = this;
+
+	setImmediate(function() {
+		self.emitChange();
+	});
 }
 
 
