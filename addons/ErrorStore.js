@@ -115,6 +115,7 @@ ErrorStore.prototype.parseAction = function(payload, actionName) {
 // generate unique id
 ErrorStore.prototype.generateId = generateUniqueId;
 
+
 /**
  * Returns the error based on actionType (e.g. user_create)
  * @public
@@ -163,7 +164,7 @@ ErrorStore.handlers = {
 
         this.errors = this.errors.push(parsed);
 
-        this.emitChange();
+        this.emitChangeAsync();
     },
 
     // handler for removing the error from
@@ -174,7 +175,7 @@ ErrorStore.handlers = {
         });
 
         this.errors = newCollection;
-        this.emitChange();
+        this.emitChangeAsync();
     }
 };
 

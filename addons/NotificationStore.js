@@ -128,7 +128,7 @@ NotificationStore.handlers = {
 
         this.notifications = this.notifications.push(parsed);
 
-        this.emitChange();
+        this.emitChangeAsync();
     },
 
     // handler for removing the error from
@@ -139,7 +139,7 @@ NotificationStore.handlers = {
         });
 
         this.notifications = newCollection;
-        this.emitChange();
+        this.emitChangeAsync();
     }
 };
 

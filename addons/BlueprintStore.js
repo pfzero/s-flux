@@ -462,20 +462,6 @@ BlueprintStore.prototype.dehydrate = function() {
 }
 
 /**
- * emitChange async, so we don't mess up component updates and errors
- * with store dispatching, resulting in wrong functionality
- */
-BlueprintStore.prototype.emitChangeAsync = function () {
-	var self = this;
-
-	setImmediate(function() {
-		self.emitChange();
-	});
-}
-
-
-
-/**
  * shouldDehydrate is the implementation of the fluxible inteface;
  * it's used as a check if the store should be dehydrated
  * @return {Bool}

@@ -72,4 +72,17 @@ BaseStore.prototype.emitChange = function emitChange(param) {
     this.emit(CHANGE_EVENT, param || this);
 };
 
+/**
+ * emitChange async, so we don't mess up component updates and errors
+ * with store dispatching, resulting in wrong functionality
+ */
+BaseStore.prototype.emitChangeAsync = function (param) {
+    var self = this;
+
+    setImmediate(function() {
+        self.emitChange(param);
+    });
+}
+
+
 module.exports = BaseStore;
