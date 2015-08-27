@@ -149,7 +149,7 @@ BlueprintService.prototype.GetBy = function (request, fields, query) {
 
 BlueprintService.prototype.Find = function (request, criteria, query) {
 
-    var complexCriteria = query;
+    var complexCriteria = query || {};
 
     complexCriteria.where = criteria;
 
