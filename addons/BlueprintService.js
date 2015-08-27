@@ -144,7 +144,7 @@ BlueprintService.prototype.GetById = function (request, resourceId, query) {
 }
 
 BlueprintService.prototype.GetBy = function (request, fields, query) {
-    return this.Find(request, fields);
+    return this.Find(request, fields, query);
 }
 
 BlueprintService.prototype.Find = function (request, criteria, query) {
