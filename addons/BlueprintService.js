@@ -29,7 +29,7 @@ var Promise = require('bluebird'),
             }
         });
 
-        return parsedQuery
+        return parsedQuery;
     };
 
 function BlueprintService(opts) {
@@ -147,9 +147,13 @@ BlueprintService.prototype.GetBy = function (request, fields, query) {
     return this.Find(request, fields);
 }
 
-BlueprintService.prototype.Find = function (request, query) {
+BlueprintService.prototype.Find = function (request, criteria, query) {
 
-    var parsedQuery = parseQuery(query);
+    var complexCriteria = query;
+
+    complexCriteria.where = criteria;
+
+    var parsedQuery = parseQuery(complexCriteria);
 
     return new Promise(function (resolve, reject) {
         request("GET", this.getResourceName())

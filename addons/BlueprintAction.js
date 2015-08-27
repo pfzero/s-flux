@@ -163,8 +163,8 @@ BlueprintAction.prototype.Delete = function(ctx, resourceId, query) {
     return this.BaseAction("Delete", ctx, resourceId, query);
 }
 
-BlueprintAction.prototype.Find = function(ctx, query) {
-    return this.BaseAction("Find", ctx, query);
+BlueprintAction.prototype.Find = function(ctx, criteria, query) {
+    return this.BaseAction("Find", ctx, criteria, query);
 }
 
 BlueprintAction.prototype.AddTo = function(ctx, resourceId, subResourceName, subResourceData, query) {
