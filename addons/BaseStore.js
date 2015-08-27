@@ -79,7 +79,8 @@ BaseStore.prototype.emitChange = function emitChange(param) {
 BaseStore.prototype.emitChangeAsync = function (param) {
     var self = this;
 
-    setImmediate(function() {
+    this._hasChanged = true;
+    setImmediate(function () {
         self.emitChange(param);
     });
 }
