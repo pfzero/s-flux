@@ -1,18 +1,14 @@
 {
   "name": "sflux",
-  "version": "0.3.2",
+  "version": "0.0.1",
   "description": "A Flux dispatcher for applications that run on the server and the client.",
-  "main": "index.js",
+  "main": "built/index.js",
+  "typings": "built/index",
   "repository": {
     "type": "git",
     "url": "git://github.com/pfzero/s-flux.git"
   },
-  "scripts": {
-    "cover": "node node_modules/istanbul/lib/cli.js cover --dir artifacts -- ./node_modules/mocha/bin/_mocha tests/unit/ --recursive --reporter spec",
-    "lint": "./node_modules/.bin/jshint lib tests",
-    "test": "./node_modules/.bin/mocha tests/unit/ --recursive --reporter spec"
-  },
-  "author": "Michael Ridgway <mridgway@yahoo-inc.com",
+  "author": "Erhan Abibula",
   "licenses": [
     {
       "type": "BSD",
@@ -24,25 +20,18 @@
     "debug": "2.x.x",
     "eventemitter3": "0.x.x",
     "immutable": "3.x.x",
-    "inherits": "2.x.x",
     "lodash": "3.x.x",
     "setimmediate": "1.x.x",
     "superagent": "0.x.x"
   },
-  "devDependencies": {
-    "chai": "^1.9.1",
-    "coveralls": "^2.11.1",
-    "istanbul": "^0.3.2",
-    "jshint": "^2.5.1",
-    "mocha": "^2.0.1"
-  },
-  "jshintConfig": {
-    "node": true
-  },
   "keywords": [
-    "yahoo",
     "flux",
     "react",
     "dispatcher"
-  ]
+  ],
+  "bugs": {
+    "url": "https://github.com/pfzero/s-flux/issues"
+  },
+  "homepage": "https://github.com/pfzero/s-flux#readme",
+  "license": "MIT"
 }

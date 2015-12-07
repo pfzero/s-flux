@@ -1,0 +1,404 @@
+'use strict';
+
+
+import debug = require('debug');
+import Im = require('immutable');
+import module = constants;
+import {IActionPayload} from './types';
+
+const storeDebug = debug('app:flux:Stores:BlueprintStore');
+
+export class DispatchHandlers {
+    /**
+ * Create() is the dispatcher for ResourceName_CREATE_SUCCESS;
+ *
+ * it takes the response from server, it transforms it to immutable
+ * Map, and adds it to the list of entities;
+ *
+ * @param {Object} payload {
+ *                         		// the data used to create
+ *                         		// the resource
+ *                         		givenInput: [resourceData],
+ *
+ * 								//
+ * 								res: {parsed version of the response from server}
+ *                         }
+ */
+    Create(payload: IActionPayload) {
+        const resource = payload.res.data,
+            imResource = <Im.Map<string, any>>Im.fromJS(resource),
+            newCollection = this.GetAll().push(imResource);
+        this.entities = newCollection;
+        this.emitChangeAsync();
+    };
+    /**
+     * Update() is the dispatcher for ResourceName_UPDATE_SUCCESS;
+     *
+     * it updates "again" the collection of entities with the data received
+     * from server. The first update is performed in optimisticUpdate, below;
+     * also, it removes the oldItem from backup collection
+     *
+     * @param {Object} payload {
+     *                         		// the entity's id and data used to update
+     *                         		givenInput: [resourceId, resourceData],
+     *
+     * 								// the parsed version of response from server
+     * 								res: {}
+     *                         }
+     */
+    dispatchHandlersNS.Update = function(payload) {
+        let resource = payload.res[this.getResourceName()], imResource = Im.fromJS(resource), resourceId = payload.givenInput[0], oldResourceIndex = this.GetAll().findIndex(item => {
+            return item.get('id') === resourceId;
+        }), oldCollection = this.GetAll(), newCollection;
+        // add to list if not found
+        if (oldResourceIndex === -1) {
+            newCollection = oldCollection.push(imResource);
+        }    // update the existing item
+        else {
+            newCollection = oldCollection.set(oldResourceIndex, imResource);
+        }
+        this.backup.Remove(resourceId);
+        this.entities = newCollection;
+        this.emitChangeAsync();
+    };
+    /**
+     * UpdateOptimistic is the dispatcher for ResourceName_UPDATE
+     *
+     * it performs the optimistic updates on the resource within this
+     * collection; Also, it stores the old version in backup collection
+     * for future usage, in case of server error
+     *
+     * @param {Object} payload {
+     *                         		// entity's id and data to update
+     *                         		givenInput: [resourceId, resourceData]
+     *                         }
+     */
+    dispatchHandlersNS.UpdateOptimistic = function(payload) {
+        let resourceId = payload.givenInput[0], changes = payload.givenInput[1], oldResource = this.GetById(resourceId), oldResourceIndex = this.GetAll().findIndex(item => {
+            return item.get('id') === resourceId;
+        }), newResource, newCollection;
+        // no resource found in the store
+        // so nothing to update.
+        if (oldResourceIndex === -1) {
+            return;
+        }
+        newResource = oldResource.merge(changes), newCollection = this.GetAll().set(oldResourceIndex, newResource);
+        this.backup.Add(oldResource.get('id'), oldResource);
+        this.entities = newCollection;
+        this.emitChangeAsync();
+    };
+    /**
+     * UpdateError is the dispatcher for ResourceName_UPDATE_ERROR
+     *
+     * it takes the backup version of the entity, and reverts the
+     * updated value via OptimisticUpdate;
+     * it also clears the backup value;
+     *
+     * @param {Object} payload {
+     *                         		// entity's id and data used to update
+     *                         		givenInput: [resourceId, resourceData],
+     *
+     * 								// server response with the update failure
+     * 								// reason
+     *                         		err: {}
+     *                         }
+     */
+    dispatchHandlersNS.UpdateError = function(payload) {
+        let resourceId = payload.givenInput[0], backupResource = this.backup.Get(resourceId), updatedIndex = this.GetAll().findIndex(item => {
+            return item.get('id') === resourceId;
+        }), oldCollection = this.GetAll(), newCollection;
+        // if no backup was found
+        // nothing to do
+        if (!backupResource) {
+            return;
+        }
+        // add the item from backup in the new set
+        newCollection = oldCollection.set(updatedIndex, backupResource);
+        // removed the item from backup store
+        this.backup.Remove(resourceId);
+        this.entities = newCollection;
+        this.emitChangeAsync();
+    };
+    /**
+     * GetById is the action handler for ResourceName_GETBYID_SUCCESS
+     *
+     * this handler will search for the value in existing list of entities first;
+     * if found, it will replace it, otherwise it will append to list;
+     *
+     * @param {Object} payload {
+     *                         		res: { response from server },
+     *                         		givenInput: [resourceId]
+     *                         }
+     */
+    dispatchHandlersNS.GetById = function(payload) {
+        let resourceId = payload.givenInput[0], imResource = Im.fromJS(payload.res[this.getResourceName()]), existingIndex = this.GetAll().findIndex(item => {
+            return item.get('id') === resourceId;
+        }), oldCollection = this.GetAll(), newCollection;
+        // just add
+        if (existingIndex === -1) {
+            newCollection = oldCollection.push(imResource);
+        }    // update
+        else {
+            newCollection = oldCollection.set(existingIndex, imResource);
+        }
+        this.entities = newCollection;
+        this.emitChangeAsync();
+    };
+    /**
+     * GetBy is the action handler for ResourceName_GETBY_SUCCESS
+     *
+     * this handler iterates the received entities from the server, searches
+     * them in the existing collection and updates the collection by either
+     * replacing the old version, or appending the new value; Thus,
+     * no duplicates will be found in the list
+     *
+     * @param {Object} payload {
+     *                         		res: { response from server },
+     *                         		givenInput: [searchedFieldsObject]
+     *                         }
+     */
+    dispatchHandlersNS.GetBy = function(payload) {
+        let imList = Im.List(Im.fromJS(payload.res[this.getResourceName()])), oldCollection = this.GetAll();
+        imList.forEach(item => {
+            const id = item.get('id'), existingIndex = oldCollection.findIndex(oldItem => {
+                return oldItem.get('id') === id;
+            });
+            // push if not found
+            if (existingIndex === -1) {
+                oldCollection = oldCollection.push(item);
+            }    // update if found
+            else {
+                oldCollection = oldCollection.set(existingIndex, item);
+            }
+        });
+        // update existing entities
+        this.entities = oldCollection;
+        this.emitChangeAsync();
+    };
+    /**
+     * Delete is the action handler for ResourceName_DELETE_SUCCESS
+     *
+     * the deletion is performed optimistically, so this function
+     * only clears the backup-ed value;
+     *
+     * @param {Object} payload {
+     *                         		// entity's id to delete
+     *                         		givenInput: [resourceId]
+     *                         }
+     */
+    dispatchHandlersNS.Delete = function(payload) {
+        const resourceId = payload.givenInput[0];
+        // just clear the backup
+        this.backup.Remove(resourceId);
+    };
+    /**
+     * DeleteOptimistic is the action handler for ResourceName_DELETE
+     *
+     * this will remove the entity with the given id from collection;
+     * the found item to be removed, will be stored in the backup collection
+     * for future usage, if the server returns an error and the deletion has
+     * failed on server;
+     *
+     * @param {Object} payload {
+     *                         		// entity's id to delete
+     *                         		givenInput: [resourceId]
+     *                         }
+     */
+    dispatchHandlersNS.DeleteOptimistic = function(payload) {
+        const resourceId = payload.givenInput[0], resource = this.GetById(resourceId), index = this.GetAll().findIndex(item => {
+            return item.get('id') === resourceId;
+        }), oldCollection = this.GetAll(), bk;
+        // nothing found in store
+        // nothing to do
+        if (index === -1) {
+            return;
+        }
+        // store old item in backup
+        this.backup.Add(resourceId, {
+            resource: resource,
+            index: index
+        });
+        // remove the item from collection
+        newCollection = oldCollection.delete(index);
+        this.entities = newCollection;
+        this.emitChangeAsync();
+    };
+    /**
+     * DeleteError is the action handler for ResourceName_DELETE_ERROR
+     *
+     * it will revert the deleted item via DeleteOptimistic;
+     * it will remove the value from backup list;
+     *
+     * @param {Object} payload **SAME AS DeleteOptimistic from above**
+     */
+    dispatchHandlersNS.DeleteError = function(payload) {
+        const resourceId = payload.givenInput[0], bk = this.backup.Get(resourceId), oldCollection = this.GetAll();
+        // if the item not found in
+        // backup (i.e. the item was not found in the store
+        // first time), do nothing
+        if (!bk) {
+            return;
+        }
+        // add back the item to the exact
+        // same position in the list
+        newCollection = oldCollection.splice(bk.index, 0, bk.resource);
+        this.entities = newCollection;
+        // clean the backup
+        this.backup.Remove(resourceId);
+        // done
+        this.emitChangeAsync();
+    };
+    /**
+     * Find is the action handler for the action ResourceName_FIND_SUCCESS
+     *
+     * this handler stores the results in a separate list, which will be
+     * overwritten everytime a search is performed;
+     *
+     * @param {Object} payload {
+     *                         		givenInput: [queryObject],
+     *
+     * 								// the parsed list with found items
+     * 								// from server
+     *                         		res: {}
+     *                         }
+     */
+    dispatchHandlersNS.Find = function(payload) {
+        const imList = Im.List(Im.fromJS(payload.res[this.getResourceName()]));
+        this.lastSearch = imList;
+        this.emitChangeAsync();
+    };
+    dispatchHandlersNS.AddTo = function(payload) {
+    };
+    dispatchHandlersNS.Link = function(payload) {
+    };
+    dispatchHandlersNS.Unlink = function(payload) {
+    };
+    dispatchHandlersNS.UnlinkOptimistic = function(payload) {
+    };
+    dispatchHandlersNS.UnlinkError = function(payload) {
+    }
+}
+
+// return handlers for the blueprint store;
+// it implements the dispatcher functions for
+// most actions
+let getHandlers = function(resourceName) {
+    const create = getActionConstants(resourceName, 'create'), update = getActionConstants(resourceName, 'update'), getById = getActionConstants(resourceName, 'getbyid'), getBy = getActionConstants(resourceName, 'getby'), del = getActionConstants(resourceName, 'delete'), find = getActionConstants(resourceName, 'find'), addTo = getActionConstants(resourceName, 'addTo'), link = getActionConstants(resourceName, 'link'), unlink = getActionConstants(resourceName, 'unlink');
+    const handlers = {}, dispatchHandlers = getDispatchHandlers();
+    // create success
+    handlers[create.success] = dispatchHandlers.Create;
+    // optimistic update
+    handlers[update.base] = dispatchHandlers.UpdateOptimistic;
+    // successfull update
+    handlers[update.success] = dispatchHandlers.Update;
+    // revert in case we used optimistic update
+    handlers[update.error] = dispatchHandlers.UpdateError;
+    // read success
+    handlers[getById.success] = dispatchHandlers.GetById;
+    // get by fields success
+    handlers[getBy.success] = dispatchHandlers.GetBy;
+    // optimistic delete
+    handlers[del.base] = dispatchHandlers.DeleteOptimistic;
+    // successfull delete
+    handlers[del.success] = dispatchHandlers.Delete;
+    handlers[del.error] = dispatchHandlers.DeleteError;
+    // find success
+    handlers[find.success] = dispatchHandlers.Find;
+    handlers[addTo.success] = dispatchHandlers.AddTo;
+    // resource was successfully linked with subresource
+    handlers[link.success] = dispatchHandlers.Link;
+    // subresource was successfully removed
+    handlers[unlink.success] = dispatchHandlers.Unlink;
+    return handlers;
+}, getDispatchHandlers = function() {
+    const dispatchHandlersNS = {};
+    return dispatchHandlersNS;
+};
+class BlueprintStore {
+    constructor() {
+        if (opts.resourceName === undefined) {
+            throw new TypeError('given resourceName is required and must identify a resource on your server api. (e.g. users)');
+        }
+        const resourceName = opts.resourceName.toLowerCase();
+        BaseStore.call(this, dispatcher);
+        this.getResourceName = function() {
+            return resourceName;
+        };
+        this.entities = Im.List();
+        this.lastSearch = Im.List();
+        this.backup = new Backup();
+    }
+    /**
+ * dehydrate is the implementation of fluxible interface; It is used
+ * to get the serialized state of the store
+ *
+ * @return {Array} the list of artists needed to transfer to browser
+ */
+    dehydrate() {
+        return {
+            lastSearch: this.GetLastSearch().toJS(),
+            entities: this.GetAll().toJS()
+        };
+    }
+    /**
+ * shouldDehydrate is the implementation of the fluxible inteface;
+ * it's used as a check if the store should be dehydrated
+ * @return {Bool}
+ */
+    rehydrate(state) {
+        storeDebug('rehydrating store', state);
+        this.lastSearch = Im.List(Im.fromJS(state.lastSearch));
+        this.entities = Im.List(Im.fromJS(state.entities));
+    }
+    getPK() {
+        return 'id';
+    }
+    GetAll() {
+        return this.entities;
+    }
+    GetById(id) {
+        const self = this;
+        return this.entities.find(entity => {
+            return entity.get(self.getPK()) === id;
+        });
+    }
+    GetBy(filterObject) {
+        const allItems = this.GetAll(), keys = Object.keys(filterObject || {});
+        // perform a filter based on given
+        // filterObject
+        return allItems.filter(item => {
+            let found = true;
+            keys.forEach(key => {
+                if (item.get(key) !== filterObject[key]) {
+                    found = false;
+                }
+            });
+            return found;
+        });
+    }
+    GetLastSearch() {
+        return this.lastSearch;
+    }
+    GetListByIds() {
+        let allItems = this.GetAll(), ids = [];
+        if (arguments[0] instanceof Array) {
+            ids = arguments[0];
+        } else {
+            // drain the arguments into ids variable
+            for (let i: number = 0, _l = arguments.length; i < _l; i++) {
+                ids.push(arguments[i]);
+            }
+        }
+        // filter the items
+        return allItems.filter(item => {
+            return ids.indexOf(item.get('id')) > -1;
+        });
+    }
+}
+;
+// BlueprintStore extends BaseStore
+inherits(BlueprintStore, BaseStore);
+BlueprintStore.GetHandlers = function(resourceName) {
+    return getHandlers(resourceName);
+};
+module.exports = BlueprintStore;
