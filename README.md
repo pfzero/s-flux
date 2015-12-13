@@ -1,92 +1,127 @@
-# Dispatchr 
-
-[![npm version](https://badge.fury.io/js/dispatchr.svg)](http://badge.fury.io/js/dispatchr)
-[![Build Status](https://travis-ci.org/yahoo/dispatchr.svg?branch=master)](https://travis-ci.org/yahoo/dispatchr)
-[![Dependency Status](https://david-dm.org/yahoo/dispatchr.svg)](https://david-dm.org/yahoo/dispatchr)
-[![devDependency Status](https://david-dm.org/yahoo/dispatchr/dev-status.svg)](https://david-dm.org/yahoo/dispatchr#info=devDependencies)
-[![Coverage Status](https://coveralls.io/repos/yahoo/dispatchr/badge.png?branch=master)](https://coveralls.io/r/yahoo/dispatchr?branch=master)
+# Dispatchr with Flux addons 
 
 A [Flux](http://facebook.github.io/flux/docs/overview.html) dispatcher for applications that run on the server and the client.
 
-## Usage
-
-For a more detailed example, see our [example application](https://github.com/yahoo/flux-example).
+The package also contains store skeletons for communicating with RESTfull webservices - e.g. [sailsjs](http://github.com/balderdashy/sails).
 
 ```js
-var ExampleStore = require('./stores/ExampleStore.js');
-var dispatcher = require('dispatchr').createDispatcher({
-    stores: [ExampleStore]
-});
+// in UserActions.js
+// create user actions
+import BlueprintAction from 'sflux/built/addons/BlueprintAction';
 
-var contextOptions = {};
-var dispatcherContext = dispatcher.createContext(contextOptions);
-
-dispatcher.dispatch('NAVIGATE', {});
-// Action has been handled fully
-```
-
-## Differences from [Facebook's Flux Dispatcher](https://github.com/facebook/flux/blob/master/src/Dispatcher.js)
-
-Dispatchr's main goal is to facilitate server-side rendering of Flux applications while also working on the client-side to encourage code reuse. In order to isolate stores between requests on the server-side, we have opted to instantiate the dispatcher and stores classes per request.
-
-In addition, action registration is done by stores as a unit rather than individual callbacks. This allows us to lazily instantiate stores as the events that they handle are dispatched. Since instantiation of stores is handled by the dispatcher, we can keep track of the stores that were used during a request and dehydrate their state to the client when the server has completed its execution.
-
-Lastly, we are able to enforce the Flux flow by restricting access to the dispatcher from stores. Instead of stores directly requiring a singleton dispatcher, we pass a dispatcher interface to the constructor of the stores to provide access to only the functions that should be available to it: `waitFor` and `getStore`. This prevents the stores from dispatching an entirely new action, which should only be done by action creators to enforce the unidirectional flow that is Flux.
-
-
-
-## Helper Utilities
-
-These utilities make creating stores less verbose and provide some `change` related functions that are common amongst all store implementations. These store helpers also implement a basic `shouldDehydrate` function that returns true if `emitChange` has been called by the store and false otherwise.
-
-### BaseStore
-
-`require('dispatchr/addons/BaseStore')` provides a base store class for extending. Provides `getContext`, `emitChange`, `addChangeListener`, and `removeChangeListener` functions. Example:
-
-```js
-var inherits = require('inherits');
-var BaseStore = require('dispatchr/addons/BaseStore');
-var MyStore = function (dispatcherInterface) {
-    BaseStore.apply(this, arguments);
-};
-inherits(MyStore, BaseStore);
-MyStore.storeName = 'MyStore';
-MyStore.handlers = {
-    'NAVIGATE': function (payload) { ... this.emitChange() ... }
-};
-MyStore.prototype.getFoo = function () { var context = this.getContext(), ... }
-module.exports = MyStore;
-```
-
-
-### createStore
-
-`require('dispatchr/addons/createStore')` provides a helper function for creating stores similar to React's `createClass` function. The created store class will extend BaseStore and have the same built-in functions. Example:
-
-```js
-var createStore = require('dispatchr/addons/createStore');
-var MyStore = createStore({
-    initialize: function () {}, // Called immediately after instantiation
-    storeName: 'MyStore',
-    handlers: {
-        'NAVIGATE': function (payload) { ... this.emitChange() ... }
+class UserAction extends BlueprintAction {
+    constructor() {
+        let resourceName = 'Award';
+        super({
+            resourceName
+        });
     }
-    foo: function () { ... }
-});
-module.exports = MyStore;
+}
+
+export default UserAction;
 ```
 
+```js
+// in UserActions.js
+// create store for users
+import BlueprintStore from 'sflux/addons/BlueprintStore';
 
-## APIs
+class UserStore extends BlueprintStore {
 
-- [Dispatchr](https://github.com/yahoo/dispatchr/blob/master/docs/dispatchr.md)
-- [Store](https://github.com/yahoo/dispatchr/blob/master/docs/store.md)
+    constructor(dispatcher) {
+        super(dispatcher, {
+            resourceName: 'user'
+        });
+    }
+}
+
+UserStore.storeName = 'UserStore';
+
+// should return a map of the following form:
+/*
+ * {
+ *     'USER_CREATE_SUCCESS': function(storeInstance, payload) {
+ * 			let data = payload.res.data,
+ * 				imData = immutable.fromJs(data);
+ * 			
+ * 			let newCollection = storeInstance.entities.push(imData);
+ * 			storeInstance.entities = newCollection;
+ * 			storeInstance.emitChangeAsync();
+ * 		}
+ * }
+ */
+
+UserStore.getHandlers = function() {
+	let bluePrintHandlers = BlueprintStore.getHandlers();
+	// blueprintHandlers includes already handlers for: `ResourceName_CREATE_SUCCESS`, `ResourceName_GETBYID_SUCCESS`, `ResourceName_GETBY_SUCCESS`, 
+	// `ResourceName_UPDATE_SUCCESS`, `ResourceName_DELETE_SUCCESS`
+	return bluePrintHandlers;
+}
+
+export default UserStore;
+```
+
+```js
+// in index.js
+
+// stores && actions
+import UserStore from './UserStore';
+import UserActions from './UserActions';
+
+import Dispatchr from 'sflux';
+
+let appDispatcher = new Dispatcher({
+    config: {
+        // http calls timeout
+        TIMEOUT: 20000,
+        // http calls namespace
+        API_URL: '/api'
+    }
+});
+
+// and then register stores and actions
+appDispatcher.registerStore(UserStore);
+appDispatcher.registerActions('UserActions', UserActions);
+
+export default appDispatcher;
+```
+
+```js
+// and then use on client(browser) side or server(node) side;
+
+import appDispatcher from 'path/to/fluxFolder';
+
+// if server side, pass context object with [express]("https://github.com/strongloop/express") request object
+// so to copy the cookie header in the superagent request method
+let context = appDispatcher.createContext({
+    req: expressReq
+});
 
 
+// on client side, use it plain
+let context = appDispatcher.createContext();
 
-## License
 
-This software is free to use under the Yahoo! Inc. BSD license.
-See the [LICENSE file][] for license text and copyright information.
+// and then pass the context object in your react components (or your framework of choice);
+// and use it
+let UserStoreInstance = context.getStore('UserStore');
 
-[LICENSE file]: https://github.com/yahoo/dispatchr/blob/master/LICENSE.md
+let immutableUser = UserStoreInstance.GetById('unique-user-id');
+
+immutableUser.get('id'); // user's id
+// etc
+
+// or call actions
+let UserActionInstance = context.getStore('UserActions');
+
+UserActionInstance.GetById('user-id-to-fetch-from-server').then(() => {
+    let imUser = UserStoreInstance.GetById('user-id-to-fetch'),
+        jsonedUser = imUser.toJSON();
+    // and use it here... but, a simple store listener should be created and update the whole app when stores changes
+});
+
+UserActionInstance.Create({
+    'firstname': 'Some',
+    'lastname': 'User'
+});
+```
