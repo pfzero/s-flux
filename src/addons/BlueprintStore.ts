@@ -3,34 +3,43 @@
 
 import debug = require('debug');
 import Im = require('immutable');
-import module = constants;
-import {IActionPayload} from './types';
+import shapes = require('../appTypes/shapes');
+import constants = require('../constants');
+import BaseStore from './BaseStore';
+import Backup from './Backup';
 
 const storeDebug = debug('app:flux:Stores:BlueprintStore');
 
+export interface IEntity extends Im.Map<string, any> { }
+export interface IEntityList extends Im.List<IEntity> { }
+
+
 export class DispatchHandlers {
+
     /**
- * Create() is the dispatcher for ResourceName_CREATE_SUCCESS;
- *
- * it takes the response from server, it transforms it to immutable
- * Map, and adds it to the list of entities;
- *
- * @param {Object} payload {
- *                         		// the data used to create
- *                         		// the resource
- *                         		givenInput: [resourceData],
- *
- * 								//
- * 								res: {parsed version of the response from server}
- *                         }
- */
-    Create(payload: IActionPayload) {
+     * Create() is the dispatcher for ResourceName_CREATE_SUCCESS;
+     *
+     * it takes the response from server, it transforms it to immutable
+     * Map, and adds it to the list of entities;
+     *
+     * @param {Object} payload {
+     *                         		// the data used to create
+     *                         		// the resource
+     *                         		givenInput: [resourceData],
+     *
+     * 								//
+     * 								res: {parsed version of the response from server}
+     *                         }
+     */
+    public static Create(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
         const resource = payload.res.data,
-            imResource = <Im.Map<string, any>>Im.fromJS(resource),
-            newCollection = this.GetAll().push(imResource);
-        this.entities = newCollection;
-        this.emitChangeAsync();
+            imResource = <IEntity>Im.fromJS(resource),
+            newCollection = storeInstance.GetAll().push(imResource);
+
+        storeInstance.entities = newCollection;
+        storeInstance.emitChangeAsync();
     };
+
     /**
      * Update() is the dispatcher for ResourceName_UPDATE_SUCCESS;
      *
@@ -46,21 +55,31 @@ export class DispatchHandlers {
      * 								res: {}
      *                         }
      */
-    dispatchHandlersNS.Update = function(payload) {
-        let resource = payload.res[this.getResourceName()], imResource = Im.fromJS(resource), resourceId = payload.givenInput[0], oldResourceIndex = this.GetAll().findIndex(item => {
-            return item.get('id') === resourceId;
-        }), oldCollection = this.GetAll(), newCollection;
+    public static Update(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
+        let resource = payload.res.data,
+            imResource = <IEntity>Im.fromJS(resource),
+            resourceId = payload.givenInput[0],
+            oldResourceIndex = storeInstance.GetAll().findIndex(item => {
+                return item.get('id') === resourceId;
+            }),
+            oldCollection = storeInstance.GetAll(),
+            newCollection: IEntityList;
+
         // add to list if not found
         if (oldResourceIndex === -1) {
             newCollection = oldCollection.push(imResource);
-        }    // update the existing item
+        }    
+        
+        // update the existing item
         else {
             newCollection = oldCollection.set(oldResourceIndex, imResource);
         }
-        this.backup.Remove(resourceId);
-        this.entities = newCollection;
-        this.emitChangeAsync();
+
+        storeInstance.backup.Remove(resourceId);
+        storeInstance.entities = newCollection;
+        storeInstance.emitChangeAsync();
     };
+
     /**
      * UpdateOptimistic is the dispatcher for ResourceName_UPDATE
      *
@@ -73,20 +92,34 @@ export class DispatchHandlers {
      *                         		givenInput: [resourceId, resourceData]
      *                         }
      */
-    dispatchHandlersNS.UpdateOptimistic = function(payload) {
-        let resourceId = payload.givenInput[0], changes = payload.givenInput[1], oldResource = this.GetById(resourceId), oldResourceIndex = this.GetAll().findIndex(item => {
-            return item.get('id') === resourceId;
-        }), newResource, newCollection;
+    public static UpdateOptimistic(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
+        let resourceId = payload.givenInput[0],
+            changes = payload.givenInput[1],
+            oldResource = storeInstance.GetById(resourceId),
+            oldResourceIndex = storeInstance.GetAll().findIndex(item => {
+                return item.get('id') === resourceId;
+            }),
+            newResource: IEntity,
+            newCollection: IEntityList;
+            
         // no resource found in the store
         // so nothing to update.
         if (oldResourceIndex === -1) {
             return;
         }
-        newResource = oldResource.merge(changes), newCollection = this.GetAll().set(oldResourceIndex, newResource);
-        this.backup.Add(oldResource.get('id'), oldResource);
-        this.entities = newCollection;
-        this.emitChangeAsync();
-    };
+
+        // set the changes onto the old entity
+        newResource = oldResource.merge(changes);
+        // modify the collection with the new value
+        newCollection = storeInstance.GetAll().set(oldResourceIndex, newResource);
+        // add the old entity in the backup store
+        storeInstance.backup.Add(oldResource.get('id'), oldResource);
+        // change the entites within the store
+        storeInstance.entities = newCollection;
+        storeInstance.emitChangeAsync();
+    }
+    
+    
     /**
      * UpdateError is the dispatcher for ResourceName_UPDATE_ERROR
      *
@@ -103,22 +136,30 @@ export class DispatchHandlers {
      *                         		err: {}
      *                         }
      */
-    dispatchHandlersNS.UpdateError = function(payload) {
-        let resourceId = payload.givenInput[0], backupResource = this.backup.Get(resourceId), updatedIndex = this.GetAll().findIndex(item => {
-            return item.get('id') === resourceId;
-        }), oldCollection = this.GetAll(), newCollection;
+    public static UpdateError(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
+
+        let resourceId = payload.givenInput[0],
+            backupResource = storeInstance.backup.Get(resourceId),
+            updatedIndex = storeInstance.GetAll().findIndex(item => {
+                return item.get('id') === resourceId;
+            }),
+            oldCollection = storeInstance.GetAll(),
+            newCollection: IEntityList;
+            
         // if no backup was found
         // nothing to do
         if (!backupResource) {
             return;
         }
+        
         // add the item from backup in the new set
         newCollection = oldCollection.set(updatedIndex, backupResource);
         // removed the item from backup store
-        this.backup.Remove(resourceId);
-        this.entities = newCollection;
-        this.emitChangeAsync();
+        storeInstance.backup.Remove(resourceId);
+        storeInstance.entities = newCollection;
+        storeInstance.emitChangeAsync();
     };
+    
     /**
      * GetById is the action handler for ResourceName_GETBYID_SUCCESS
      *
@@ -130,20 +171,30 @@ export class DispatchHandlers {
      *                         		givenInput: [resourceId]
      *                         }
      */
-    dispatchHandlersNS.GetById = function(payload) {
-        let resourceId = payload.givenInput[0], imResource = Im.fromJS(payload.res[this.getResourceName()]), existingIndex = this.GetAll().findIndex(item => {
-            return item.get('id') === resourceId;
-        }), oldCollection = this.GetAll(), newCollection;
+    public static GetById(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
+
+        let resourceId = payload.givenInput[0],
+            data = payload.res.data,
+            imResource = Im.fromJS(data),
+            existingIndex = storeInstance.GetAll().findIndex(item => {
+                return item.get('id') === resourceId;
+            }),
+            oldCollection = storeInstance.GetAll(),
+            newCollection: IEntityList;
+
         // just add
         if (existingIndex === -1) {
             newCollection = oldCollection.push(imResource);
-        }    // update
+        }
+        // update
         else {
             newCollection = oldCollection.set(existingIndex, imResource);
         }
-        this.entities = newCollection;
-        this.emitChangeAsync();
+
+        storeInstance.entities = newCollection;
+        storeInstance.emitChangeAsync();
     };
+
     /**
      * GetBy is the action handler for ResourceName_GETBY_SUCCESS
      *
@@ -157,24 +208,35 @@ export class DispatchHandlers {
      *                         		givenInput: [searchedFieldsObject]
      *                         }
      */
-    dispatchHandlersNS.GetBy = function(payload) {
-        let imList = Im.List(Im.fromJS(payload.res[this.getResourceName()])), oldCollection = this.GetAll();
+    public static GetBy(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
+
+        let data = payload.res.data,
+            imList = <IEntityList>Im.List(Im.fromJS(data)),
+            oldCollection = storeInstance.GetAll();
+
         imList.forEach(item => {
-            const id = item.get('id'), existingIndex = oldCollection.findIndex(oldItem => {
-                return oldItem.get('id') === id;
-            });
+
+            const id = item.get('id'),
+                existingIndex = oldCollection.findIndex(oldItem => {
+                    return oldItem.get('id') === id;
+                });
+                
             // push if not found
             if (existingIndex === -1) {
                 oldCollection = oldCollection.push(item);
-            }    // update if found
+            }    
+            // update if found
             else {
                 oldCollection = oldCollection.set(existingIndex, item);
             }
         });
+        
         // update existing entities
-        this.entities = oldCollection;
-        this.emitChangeAsync();
+        storeInstance.entities = oldCollection;
+        storeInstance.emitChangeAsync();
     };
+    
+    
     /**
      * Delete is the action handler for ResourceName_DELETE_SUCCESS
      *
@@ -186,11 +248,12 @@ export class DispatchHandlers {
      *                         		givenInput: [resourceId]
      *                         }
      */
-    dispatchHandlersNS.Delete = function(payload) {
+    public static Delete(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
         const resourceId = payload.givenInput[0];
         // just clear the backup
-        this.backup.Remove(resourceId);
+        storeInstance.backup.Remove(resourceId);
     };
+    
     /**
      * DeleteOptimistic is the action handler for ResourceName_DELETE
      *
@@ -204,24 +267,32 @@ export class DispatchHandlers {
      *                         		givenInput: [resourceId]
      *                         }
      */
-    dispatchHandlersNS.DeleteOptimistic = function(payload) {
-        const resourceId = payload.givenInput[0], resource = this.GetById(resourceId), index = this.GetAll().findIndex(item => {
-            return item.get('id') === resourceId;
-        }), oldCollection = this.GetAll(), bk;
+    public static DeleteOptimistic(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
+        const resourceId = payload.givenInput[0],
+            resource = storeInstance.GetById(resourceId),
+            index = storeInstance.GetAll().findIndex(item => {
+                return item.get('id') === resourceId;
+            }),
+            oldCollection = storeInstance.GetAll();
+
+        let newCollection: IEntityList;
+
         // nothing found in store
         // nothing to do
         if (index === -1) {
             return;
         }
+
         // store old item in backup
-        this.backup.Add(resourceId, {
+        storeInstance.backup.Add(resourceId, {
             resource: resource,
             index: index
         });
+
         // remove the item from collection
         newCollection = oldCollection.delete(index);
-        this.entities = newCollection;
-        this.emitChangeAsync();
+        storeInstance.entities = newCollection;
+        storeInstance.emitChangeAsync();
     };
     /**
      * DeleteError is the action handler for ResourceName_DELETE_ERROR
@@ -231,23 +302,35 @@ export class DispatchHandlers {
      *
      * @param {Object} payload **SAME AS DeleteOptimistic from above**
      */
-    dispatchHandlersNS.DeleteError = function(payload) {
-        const resourceId = payload.givenInput[0], bk = this.backup.Get(resourceId), oldCollection = this.GetAll();
+    public static DeleteError(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
+
+        const resourceId = payload.givenInput[0],
+            bk = storeInstance.backup.Get(resourceId),
+            oldCollection = storeInstance.GetAll();
+
+        let newCollection: IEntityList;
+
         // if the item not found in
         // backup (i.e. the item was not found in the store
         // first time), do nothing
         if (!bk) {
             return;
         }
+
         // add back the item to the exact
         // same position in the list
-        newCollection = oldCollection.splice(bk.index, 0, bk.resource);
-        this.entities = newCollection;
+        newCollection = <IEntityList>oldCollection.splice(bk.index, 0, bk.resource);
+
+        storeInstance.entities = newCollection;
+
         // clean the backup
-        this.backup.Remove(resourceId);
+        storeInstance.backup.Remove(resourceId);
+
         // done
-        this.emitChangeAsync();
+        storeInstance.emitChangeAsync();
     };
+    
+    
     /**
      * Find is the action handler for the action ResourceName_FIND_SUCCESS
      *
@@ -262,112 +345,98 @@ export class DispatchHandlers {
      *                         		res: {}
      *                         }
      */
-    dispatchHandlersNS.Find = function(payload) {
-        const imList = Im.List(Im.fromJS(payload.res[this.getResourceName()]));
-        this.lastSearch = imList;
-        this.emitChangeAsync();
+    public static Find(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
+        const data = payload.res.data,
+            imList = <IEntityList>Im.List(Im.fromJS(data));
+
+        storeInstance.lastSearch = imList;
+
+        storeInstance.emitChangeAsync();
     };
-    dispatchHandlersNS.AddTo = function(payload) {
+
+    // no implementations yet on these
+    public static AddTo(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
     };
-    dispatchHandlersNS.Link = function(payload) {
+    public static Link(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
     };
-    dispatchHandlersNS.Unlink = function(payload) {
+    public static Unlink(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
     };
-    dispatchHandlersNS.UnlinkOptimistic = function(payload) {
+    public static UnlinkOptimistic(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
     };
-    dispatchHandlersNS.UnlinkError = function(payload) {
+    public static UnlinkError(storeInstance: BlueprintStore, payload: shapes.IActionPayload) {
     }
 }
 
-// return handlers for the blueprint store;
-// it implements the dispatcher functions for
-// most actions
-let getHandlers = function(resourceName) {
-    const create = getActionConstants(resourceName, 'create'), update = getActionConstants(resourceName, 'update'), getById = getActionConstants(resourceName, 'getbyid'), getBy = getActionConstants(resourceName, 'getby'), del = getActionConstants(resourceName, 'delete'), find = getActionConstants(resourceName, 'find'), addTo = getActionConstants(resourceName, 'addTo'), link = getActionConstants(resourceName, 'link'), unlink = getActionConstants(resourceName, 'unlink');
-    const handlers = {}, dispatchHandlers = getDispatchHandlers();
-    // create success
-    handlers[create.success] = dispatchHandlers.Create;
-    // optimistic update
-    handlers[update.base] = dispatchHandlers.UpdateOptimistic;
-    // successfull update
-    handlers[update.success] = dispatchHandlers.Update;
-    // revert in case we used optimistic update
-    handlers[update.error] = dispatchHandlers.UpdateError;
-    // read success
-    handlers[getById.success] = dispatchHandlers.GetById;
-    // get by fields success
-    handlers[getBy.success] = dispatchHandlers.GetBy;
-    // optimistic delete
-    handlers[del.base] = dispatchHandlers.DeleteOptimistic;
-    // successfull delete
-    handlers[del.success] = dispatchHandlers.Delete;
-    handlers[del.error] = dispatchHandlers.DeleteError;
-    // find success
-    handlers[find.success] = dispatchHandlers.Find;
-    handlers[addTo.success] = dispatchHandlers.AddTo;
-    // resource was successfully linked with subresource
-    handlers[link.success] = dispatchHandlers.Link;
-    // subresource was successfully removed
-    handlers[unlink.success] = dispatchHandlers.Unlink;
-    return handlers;
-}, getDispatchHandlers = function() {
-    const dispatchHandlersNS = {};
-    return dispatchHandlersNS;
-};
-class BlueprintStore {
-    constructor() {
+export default class BlueprintStore extends BaseStore {
+
+    protected resourceName: string;
+
+    public entities: IEntityList = <IEntityList>Im.List();
+    public lastSearch: IEntityList = <IEntityList>Im.List();
+    public backup: Backup = new Backup();
+
+    constructor(dispatcher: shapes.IDispatcherInterface, opts: shapes.IResourceOptions) {
+        super(dispatcher);
+
         if (opts.resourceName === undefined) {
             throw new TypeError('given resourceName is required and must identify a resource on your server api. (e.g. users)');
         }
-        const resourceName = opts.resourceName.toLowerCase();
-        BaseStore.call(this, dispatcher);
-        this.getResourceName = function() {
-            return resourceName;
-        };
-        this.entities = Im.List();
-        this.lastSearch = Im.List();
-        this.backup = new Backup();
+
+        this.resourceName = opts.resourceName.toLowerCase();
     }
+
+    public getResourceName() {
+        return this.resourceName;
+    }
+    
     /**
- * dehydrate is the implementation of fluxible interface; It is used
- * to get the serialized state of the store
- *
- * @return {Array} the list of artists needed to transfer to browser
- */
+    * dehydrate is the implementation of fluxible interface; It is used
+    * to get the serialized state of the store
+    *
+    * @return {Array} the list of artists needed to transfer to browser
+    */
     dehydrate() {
         return {
             lastSearch: this.GetLastSearch().toJS(),
             entities: this.GetAll().toJS()
         };
     }
+    
+    
     /**
- * shouldDehydrate is the implementation of the fluxible inteface;
- * it's used as a check if the store should be dehydrated
- * @return {Bool}
- */
-    rehydrate(state) {
+     * shouldDehydrate is the implementation of the fluxible inteface;
+     * it's used as a check if the store should be dehydrated
+     * @return {Bool}
+     */
+    rehydrate(state: any) {
         storeDebug('rehydrating store', state);
-        this.lastSearch = Im.List(Im.fromJS(state.lastSearch));
-        this.entities = Im.List(Im.fromJS(state.entities));
+        this.lastSearch = <IEntityList>Im.List(Im.fromJS(state.lastSearch));
+        this.entities = <IEntityList>Im.List(Im.fromJS(state.entities));
     }
+
     getPK() {
         return 'id';
     }
+
     GetAll() {
         return this.entities;
     }
-    GetById(id) {
-        const self = this;
+
+    GetById(id: string) {
         return this.entities.find(entity => {
-            return entity.get(self.getPK()) === id;
+            return entity.get(this.getPK()) === id;
         });
     }
-    GetBy(filterObject) {
-        const allItems = this.GetAll(), keys = Object.keys(filterObject || {});
+
+    GetBy(filterObject: any) {
+        const allItems = this.GetAll(),
+            keys = Object.keys(filterObject || {});
+
         // perform a filter based on given
-        // filterObject
+        // filterObject        
         return allItems.filter(item => {
             let found = true;
+
             keys.forEach(key => {
                 if (item.get(key) !== filterObject[key]) {
                     found = false;
@@ -376,29 +445,66 @@ class BlueprintStore {
             return found;
         });
     }
+
     GetLastSearch() {
         return this.lastSearch;
     }
-    GetListByIds() {
-        let allItems = this.GetAll(), ids = [];
-        if (arguments[0] instanceof Array) {
-            ids = arguments[0];
-        } else {
-            // drain the arguments into ids variable
-            for (let i: number = 0, _l = arguments.length; i < _l; i++) {
-                ids.push(arguments[i]);
-            }
-        }
+
+    GetListByIds(ids: string[] = []) {
+        let allItems = this.GetAll();
+
         // filter the items
         return allItems.filter(item => {
             return ids.indexOf(item.get('id')) > -1;
         });
     }
+
+
+    public static name: string;
+    public static storeName: string;
+
+    public static actionHandlers = DispatchHandlers;
+
+    public static getHandlers(): shapes.IStoreDispatcher {
+        const resourceName = this.name || this.storeName;
+
+        const create = constants.getActionConstants(resourceName, 'create'),
+            update = constants.getActionConstants(resourceName, 'update'),
+            getById = constants.getActionConstants(resourceName, 'getbyid'),
+            getBy = constants.getActionConstants(resourceName, 'getby'),
+            del = constants.getActionConstants(resourceName, 'delete'),
+            find = constants.getActionConstants(resourceName, 'find'),
+            addTo = constants.getActionConstants(resourceName, 'addTo'),
+            link = constants.getActionConstants(resourceName, 'link'),
+            unlink = constants.getActionConstants(resourceName, 'unlink');
+
+        const handlers: shapes.IStoreDispatcher = {};
+
+        // create success
+        handlers[create.success] = this.actionHandlers.Create;
+        // optimistic update
+        handlers[update.base] = this.actionHandlers.UpdateOptimistic;
+        // successfull update
+        handlers[update.success] = this.actionHandlers.Update;
+        // revert in case we used optimistic update
+        handlers[update.error] = this.actionHandlers.UpdateError;
+        // read success
+        handlers[getById.success] = this.actionHandlers.GetById;
+        // get by fields success
+        handlers[getBy.success] = this.actionHandlers.GetBy;
+        // optimistic delete
+        handlers[del.base] = this.actionHandlers.DeleteOptimistic;
+        // successfull delete
+        handlers[del.success] = this.actionHandlers.Delete;
+        handlers[del.error] = this.actionHandlers.DeleteError;
+        // find success
+        handlers[find.success] = this.actionHandlers.Find;
+        handlers[addTo.success] = this.actionHandlers.AddTo;
+        // resource was successfully linked with subresource
+        handlers[link.success] = this.actionHandlers.Link;
+        // subresource was successfully removed
+        handlers[unlink.success] = this.actionHandlers.Unlink;
+
+        return handlers;
+    }
 }
-;
-// BlueprintStore extends BaseStore
-inherits(BlueprintStore, BaseStore);
-BlueprintStore.GetHandlers = function(resourceName) {
-    return getHandlers(resourceName);
-};
-module.exports = BlueprintStore;

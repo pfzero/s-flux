@@ -4,9 +4,9 @@
  * errors once they get into
  * @return {String} The generated unique id
  */
-module.exports = function () {
+export default function generateUniqueId(): string {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 3 | 8;
         return v.toString(16);
     });
-};
+}

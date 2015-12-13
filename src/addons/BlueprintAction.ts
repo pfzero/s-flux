@@ -1,13 +1,4 @@
 
-import debug = require('debug');
-import Promise = require('bluebird');
-import request = require('superagent');
-import module = constants;
-const blueprintActionDebug = debug('app:flux:actions:BlueprintAction');
-const BlueprintService = require('./BlueprintService');
-
-import {IResourceOptions, IServiceMethod, IApiService, IBlueprintActions, IBlueprintServices} from './types';
-
 /**
  * BlueprintAction is the base class for creating
  * blueprint actions for a resource
@@ -57,9 +48,20 @@ import {IResourceOptions, IServiceMethod, IApiService, IBlueprintActions, IBluep
  * userActions.Link(ctx, userId, subResourceName, subResourceId): Promise
  * userActions.UnLink(ctx, userId, subResourceName, subResourceId): Promise
  */
-class BlueprintAction implements IBlueprintActions {
 
-    private apiService: IBlueprintServices
+import debug = require('debug');
+import Promise = require('bluebird');
+import request = require('superagent');
+import constants = require('../constants/index');
+import shapes = require('../appTypes/shapes');
+
+import {BlueprintService} from './BlueprintService';
+
+const blueprintActionDebug = debug('app:flux:actions:BlueprintAction');
+
+class BlueprintAction implements shapes.IBlueprintActions {
+
+    private apiService: shapes.IBlueprintServices
     private resourceName: string
 
     /**
@@ -78,7 +80,7 @@ class BlueprintAction implements IBlueprintActions {
      *                           }
      *                       }
      */
-    constructor(opts: IResourceOptions) {
+    constructor(opts: shapes.IResourceOptions) {
 
         if (opts.resourceName === undefined) {
             throw new TypeError('given resourceName is requierd and must identify a resource on your server api. (e.g. users)');
@@ -93,7 +95,7 @@ class BlueprintAction implements IBlueprintActions {
         }
     }
 
-    private callService(action: string, service: request.SuperAgentStatic, ...data: Array<any>): Promise<any> {
+    private callService(action: string, service: shapes.IRestMethod, ...data: Array<any>): Promise<any> {
         return this.getApiService()[action](service, ...data);
     }
 
@@ -101,15 +103,17 @@ class BlueprintAction implements IBlueprintActions {
         return this.resourceName;
     }
 
-    protected getApiService(): IBlueprintServices {
+    protected getApiService(): any {
         return this.apiService;
     }
 
-    BaseAction(action: string, ctx: any, ...givenInput: Array<any>) {
+    protected BaseAction(action: string, ctx: shapes.IContext, ...givenInput: Array<any>) {
         let actionConstants = constants.getActionConstants(this.getResourceName(), action);
 
         blueprintActionDebug('dispatching...', actionConstants.base);
-        ctx.dispatch(actionConstants.base, { givenInput });
+        ctx.dispatch(actionConstants.base, {
+            givenInput: givenInput
+        });
 
         return this.callService(action, ctx.getBaseRequest(), ...givenInput).then(res => {
             blueprintActionDebug('dispatching...', actionConstants.success);
@@ -128,37 +132,44 @@ class BlueprintAction implements IBlueprintActions {
         });
     }
 
-    Create(ctx: any, resourceData: any, query?: any) {
+    public Create(ctx: shapes.IContext, resourceData: any, query?: any) {
         return this.BaseAction('Create', ctx, resourceData, query);
     }
-    
-    // alias Update
-    Batch(ctx: any, resourceId: string, resourceData: any, query: any) {
-        return this.Update(ctx, resourceId, resourceData, query);
-    }
-    
-    Update(ctx: any, resourceId: string, resourceData: any, query: any) {
-        return this.BaseAction('Update', ctx, resourceId, resourceData, query);
-    }
-    GetById(ctx: any, resourceId: string, query?: string) {
+
+    public GetById(ctx: shapes.IContext, resourceId: string, query?: string) {
         return this.BaseAction('GetById', ctx, resourceId, query);
     }
-    GetBy(ctx: any, fields?: any, query?: any) {
+
+    public GetBy(ctx: shapes.IContext, fields?: any, query?: any) {
         return this.BaseAction('GetBy', ctx, fields, query);
     }
-    Delete(ctx: any, resourceId: string, query?: string) {
+        
+    // alias Update
+    public Batch(ctx: shapes.IContext, resourceId: string, resourceData: any, query: any) {
+        return this.Update(ctx, resourceId, resourceData, query);
+    }
+
+    public Update(ctx: shapes.IContext, resourceId: string, resourceData: any, query: any) {
+        return this.BaseAction('Update', ctx, resourceId, resourceData, query);
+    }
+
+    public Delete(ctx: shapes.IContext, resourceId: string, query?: string) {
         return this.BaseAction('Delete', ctx, resourceId, query);
     }
-    Find(ctx: any, query: any) {
+
+    public Find(ctx: shapes.IContext, query: any) {
         return this.BaseAction('Find', ctx, query);
     }
-    AddTo(ctx: any, resourceId: string, subResourceName: string, subResourceData: any, query: any) {
+
+    public AddTo(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceData: any, query: any) {
         return this.BaseAction('AddTo', ctx, resourceId, subResourceName, subResourceData, query);
     }
-    Link(ctx: any, resourceId: string, subResourceName: string, subResourceId: string, query: any) {
+
+    public Link(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceId: string, query: any) {
         return this.BaseAction('Link', ctx, resourceId, subResourceName, subResourceId, query);
     }
-    UnLink(ctx: any, resourceId: string, subResourceName: string, subResourceId: string, query: any) {
+
+    public UnLink(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceId: string, query: any) {
         return this.BaseAction('UnLink', ctx, resourceId, subResourceName, subResourceId, query);
     }
 }

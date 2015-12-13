@@ -1,92 +1,113 @@
-/**
- * Copyright 2014, Yahoo! Inc.
- * Copyrights licensed under the New BSD License. See the accompanying LICENSE file for terms.
- */
 'use strict';
-const debug = require('debug')('Dispatchr:Action');
-class Action {
-    constructor() {
-        this.name = name;
-        this.payload = payload;
-        this._handlers = null;
-        this._isExecuting = false;
-        this._isCompleted = null;
+
+import debug = require('debug');
+
+import shapes = require('../appTypes/shapes');
+
+const actionDebug = debug('Dispatchr:Action');
+
+
+export class Action {
+
+    private handlers: shapes.IDispatcherMap = {};
+
+    private isExecuting: boolean = false;
+
+    private isCompleted: { [storeName: string]: boolean } = {};
+
+    private storeInstances: shapes.IStoreInstanceMap = {};
+
+    constructor(public actionName: string, public payload: shapes.IActionPayload) { }
+
+
+    private getStore(storeName: string) {
+        return this.storeInstances[storeName];
     }
+    
+    
     /**
- * Gets a name from a store
- * @method getStoreName
- * @param {String|Object} store The store name or class from which to extract
- *      the name
- * @returns {String}
- */
-    getStoreName(store) {
-        if ('string' === typeof store) {
-            return store;
-        }
-        return store.storeName;
-    }
-    /**
- * Executes all handlers for the action
- * @method execute
- * @param {Function[]} handlers A mapping of store names to handler function
- * @throws {Error} if action has already been executed
- */
-    execute(handlers) {
-        if (this._isExecuting) {
-            throw new Error('Action is already dispatched');
-        }
-        const self = this;
-        this._handlers = handlers;
-        this._isExecuting = true;
-        this._isCompleted = {};
-        Object.keys(handlers).forEach(storeName => {
-            self._callHandler(storeName);
-        });
-    }
-    /**
- * Calls an individual store's handler function
- * @method _callHandler
- * @param {String} storeName
- * @private
- * @throws {Error} if handler does not exist for storeName
- */
-    _callHandler(storeName) {
-        const self = this, handlerFn = self._handlers[storeName];
+     * Calls an individual store's handler function
+     * @method callHandler
+     * @param {String} storeName
+     * @private
+     * @throws {Error} if handler does not exist for storeName
+     */
+    private callHandler(storeName: string): void {
+        const handlerFn = this.handlers[storeName];
+
         if (!handlerFn) {
             throw new Error(`${ storeName } does not have a handler for action ${ self.name }`);
         }
-        if (self._isCompleted[storeName]) {
+
+        if (this.isCompleted[storeName]) {
             return;
         }
-        self._isCompleted[storeName] = false;
+        this.isCompleted[storeName] = false;
+
         debug(`executing handler for ${ storeName }`);
-        handlerFn(self.payload, self.name);
-        self._isCompleted[storeName] = true;
+
+        let storeInstance = this.getStore(storeName);
+
+        handlerFn(storeInstance, this.payload, this.actionName);
+
+        this.isCompleted[storeName] = true;
     }
+
+    public setStoreInstances(stores: shapes.IStoreInstanceMap): void {
+        this.storeInstances = stores;
+    }
+
     /**
- * Waits until all stores have finished handling an action and then calls
- * the callback
- * @method waitFor
- * @param {String|String[]|Constructor|Constructor[]} stores An array of stores as strings or constructors to wait for
- * @param {Function} callback Called after all stores have completed handling their actions
- * @throws {Error} if the action is not being executed
- */
-    waitFor(stores, callback) {
+     * Executes all handlers for the action
+     * @method execute
+     * @param {Function[]} handlers A mapping of store names to handler function
+     * @throws {Error} if action has already been executed
+     */
+    public execute(handlers: shapes.IDispatcherMap): void {
+
+        if (this.isExecuting) {
+            throw new Error('Action is already dispatched');
+        }
+
         const self = this;
-        if (!self._isExecuting) {
+        this.handlers = handlers;
+        this.isExecuting = true;
+        this.isCompleted = {};
+
+        Object.keys(handlers).forEach(storeName => {
+            self.callHandler(storeName);
+        });
+    }
+    
+    /**
+     * Waits until all stores have finished handling an action and then calls
+     * the callback
+     * @method waitFor
+     * @param {String|String[]|Constructor|Constructor[]} stores An array of stores as strings or constructors to wait for
+     * @param {Function} callback Called after all stores have completed handling their actions
+     * @throws {Error} if the action is not being executed
+     */
+    public waitFor(stores: string | string[], callback: Function): void {
+        const self = this;
+        let storesToWait: string[] = [];
+
+        if (!self.isExecuting) {
             throw new Error('waitFor called even though there is no action being executed!');
         }
+
         if (!Array.isArray(stores)) {
-            stores = [stores];
+            storesToWait = [stores];
+        } else {
+            storesToWait = stores;
         }
-        debug(`waiting on ${ stores.join(', ') }`);
-        stores.forEach(storeName => {
-            storeName = self.getStoreName(storeName);
-            if (self._handlers[storeName]) {
-                self._callHandler(storeName);
+
+        debug(`waiting on ${ storesToWait.join(', ') }`);
+
+        storesToWait.forEach(storeName => {
+            if (typeof this.handlers[storeName] === 'function') {
+                this.callHandler(storeName);
             }
         });
         callback();
     }
 }
-module.exports = Action;

@@ -1,15 +1,12 @@
-/**
- * Copyright 2014, Yahoo! Inc.
- * Copyrights licensed under the New BSD License. See the accompanying LICENSE file for terms.
- */
 
 import EventEmitter3 = require('eventemitter3');
+import components = require('../appTypes/components');
+import shapes = require('../appTypes/shapes');
 
 const CHANGE_EVENT = 'change';
 
-abstract class BaseStore extends EventEmitter3 {
+export default class BaseStore extends components.Store {
 
-    private hasChanged: boolean = false;
 
     protected initialize: { (): void } = () => { }
 
@@ -19,11 +16,10 @@ abstract class BaseStore extends EventEmitter3 {
      * @param dispatcher The dispatcher interface
      * @constructor
      */
-    constructor(private dispatcher: any) {
-        super();
-        this.initialize();
+    constructor(dispatcher: shapes.IDispatcherInterface) {
+        super(dispatcher);
     }
-    
+
     /**
      * Convenience method for getting the store context object.
      * @method getContext
@@ -32,7 +28,7 @@ abstract class BaseStore extends EventEmitter3 {
     getContext() {
         return this.dispatcher.getContext();
     }
- 
+
     /**
      * Add a listener for the change event
      * @method addChangeListener
@@ -41,7 +37,7 @@ abstract class BaseStore extends EventEmitter3 {
     addChangeListener(callback: Function) {
         this.on(CHANGE_EVENT, callback);
     }
-    
+
     /**
      * Remove a listener for the change event
      * @method removeChangeListener
@@ -50,7 +46,7 @@ abstract class BaseStore extends EventEmitter3 {
     removeChangeListener(callback: Function) {
         this.removeListener(CHANGE_EVENT, callback);
     }
-   
+
     /**
      * Determines whether the store should dehydrate or not. By default, only dehydrates
      * if the store has emitted an update event. If no update has been emitted, it is assumed
@@ -61,24 +57,22 @@ abstract class BaseStore extends EventEmitter3 {
     shouldDehydrate(): boolean {
         return this.hasChanged;
     }
-   
+
     /**
      * Emit a change event
      * @method emitChange
      * @param {*} param=this
      */
-    emitChange(param: any) {
+    emitChange(param?: any) {
         this.hasChanged = true;
         this.emit(CHANGE_EVENT, param || this);
     }
-    
+
     /**
      * emitChange async, so we don't mess up component updates and errors
      * with store dispatching, resulting in wrong functionality
      */
-    emitChangeAsync(param: any) {
+    emitChangeAsync(param?: any) {
         setImmediate(() => this.emitChange(param));
     }
 }
-
-export default BaseStore;

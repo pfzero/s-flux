@@ -6,11 +6,12 @@
         "outDir": "built",
         "rootDir": "src",
         "sourceMap": true,
-        "removeComments": true,
-        "declaration": true
-        
+        "removeComments": false,
+        "declaration": true,
+        "noLib": false
     },
     "exclude": [
-        "node_modules", "built"
+        "node_modules",
+        "built"
     ]
 }

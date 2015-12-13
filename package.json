@@ -2,8 +2,7 @@
   "name": "sflux",
   "version": "0.0.1",
   "description": "A Flux dispatcher for applications that run on the server and the client.",
-  "main": "built/index.js",
-  "typings": "built/index",
+  "main": "built/lib/Dispatcher.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/pfzero/s-flux.git"

@@ -2,9 +2,9 @@
 import debug = require('debug');
 import Promise = require('bluebird');
 import request = require('superagent');
-import module = constants;
 
-import {IResourceOptions, IBlueprintActions, IServiceMethod, IApiService, IBlueprintServices, IUrlQuery, IParsedResponse} from './types';
+import shapes = require('../appTypes/shapes');
+import constants = require('../constants');
 
 const errors = constants.errors;
 const blueprintServiceDebug = debug('app:flux:services:BlueprintService');
@@ -13,7 +13,7 @@ const blueprintServiceDebug = debug('app:flux:services:BlueprintService');
 export class ServiceResponseParser {
     
     // parse server response
-    protected static defaultResponseHandler(resolve: Function, reject: Function, err: Error, res: request.Response): void {
+    protected defaultResponseHandler(resolve: Function, reject: Function, err: Error, res: request.Response): void {
         if (err) {
             return reject(this.parseError(err));
         }
@@ -28,8 +28,8 @@ export class ServiceResponseParser {
     }
     
     // parse query
-    protected static parseQuery(query: any): IUrlQuery {
-        let parsedQuery: IUrlQuery = {},
+    protected parseQuery(query: any): shapes.IUrlQuery {
+        let parsedQuery: shapes.IUrlQuery = {},
             qKeys = Object.keys(query || {});
 
         qKeys.forEach(searchKey => {
@@ -44,13 +44,13 @@ export class ServiceResponseParser {
     }
 
     // parse error
-    protected static parseError(err: Error) {
+    protected parseError(err: Error) {
         return err;
     }
 
     // parse server response
-    protected static parseResponse(response: request.Response): IParsedResponse {
-        let parsed = <IParsedResponse>{};
+    protected parseResponse(response: request.Response): shapes.IParsedResponse {
+        let parsed = <shapes.IParsedResponse>{};
         
         // success
         if (response.status >= 200 && response.status < 300) {
@@ -92,11 +92,11 @@ export class ServiceResponseParser {
 }
 
 
-export class BlueprintService extends ServiceResponseParser {
+export class BlueprintService extends ServiceResponseParser implements shapes.IBlueprintServices {
 
     private resourceName: string
 
-    constructor(opts: IResourceOptions) {
+    constructor(opts: shapes.IResourceOptions) {
         super();
 
         if (opts.resourceName === undefined) {
@@ -113,86 +113,87 @@ export class BlueprintService extends ServiceResponseParser {
         return 'id';
     }
 
-    Create(request: request.SuperAgentStatic, data: any, query: any) {
-        const parsedQuery = BlueprintService.parseQuery(query);
+    public Create(request: shapes.IRestMethod, data: any, query: any) {
+        const parsedQuery = this.parseQuery(query);
         return new Promise((resolve, reject) => {
-            request('POST', this.getResourceName()).send(data).query(parsedQuery).end(BlueprintService.defaultResponseHandler.bind(this, resolve, reject));
+            request('POST', this.getResourceName()).send(data).query(parsedQuery).end(this.defaultResponseHandler.bind(this, resolve, reject));
         });
     }
-    Update(request: request.SuperAgentStatic, resourceId: string, data: any, query: any) {
+
+    public Update(request: shapes.IRestMethod, resourceId: string, data: any, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }`,
-            parsedQuery = BlueprintService.parseQuery(query);
+            parsedQuery = this.parseQuery(query);
 
         return new Promise((resolve, reject) => {
-            request('PUT', uri).send(data).query(parsedQuery).end(BlueprintService.defaultResponseHandler.bind(this, resolve, reject));
+            request('PUT', uri).send(data).query(parsedQuery).end(this.defaultResponseHandler.bind(this, resolve, reject));
         });
     }
     
     // alias Update
-    Batch(request: request.SuperAgentStatic, resourceId: string, data: any, query: any) {
+    public Batch(request: shapes.IRestMethod, resourceId: string, data: any, query: any) {
         return this.Update(request, resourceId, data, query);
     }
 
-    Delete(request: request.SuperAgentStatic, resourceId: string, query: any) {
+    public Delete(request: shapes.IRestMethod, resourceId: string, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }`,
-            parsedQuery = BlueprintService.parseQuery(query);
+            parsedQuery = this.parseQuery(query);
 
         return new Promise((resolve, reject) => {
-            request('DELETE', uri).query(parsedQuery).end(BlueprintService.defaultResponseHandler.bind(this, resolve, reject));
+            request('DELETE', uri).query(parsedQuery).end(this.defaultResponseHandler.bind(this, resolve, reject));
         });
     }
-    GetById(request: request.SuperAgentStatic, resourceId: string, query: any) {
+    public GetById(request: shapes.IRestMethod, resourceId: string, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }`,
-            parsedQuery = BlueprintService.parseQuery(query);
+            parsedQuery = this.parseQuery(query);
 
         return new Promise((resolve, reject) => {
-            request('GET', uri).query(query).end(BlueprintService.defaultResponseHandler.bind(this, resolve, reject));
+            request('GET', uri).query(query).end(this.defaultResponseHandler.bind(this, resolve, reject));
         });
     }
 
-    GetBy(request: request.SuperAgentStatic, fields: Object, query: any) {
+    public GetBy(request: shapes.IRestMethod, fields: Object, query: any) {
         return this.Find(request, fields, query);
     }
 
-    Find(request: request.SuperAgentStatic, criteria: any = {}, query: any = {}) {
+    public Find(request: shapes.IRestMethod, criteria: any = {}, query: any = {}) {
 
         var complexCriteria = query;
 
         complexCriteria.where = criteria;
 
-        var parsedQuery = BlueprintService.parseQuery(complexCriteria);
+        var parsedQuery = this.parseQuery(complexCriteria);
 
         return new Promise((resolve, reject) => {
             request("GET", this.getResourceName())
                 .query(parsedQuery)
-                .end(BlueprintService.defaultResponseHandler.bind(this, resolve, reject));
+                .end(this.defaultResponseHandler.bind(this, resolve, reject));
         });
     }
 
-    AddTo(request: request.SuperAgentStatic, resourceId: string, subResource: string, subResourceData: any, query: any) {
+    public AddTo(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceData: any, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }/${ subResource }`,
-            parsedQuery = BlueprintService.parseQuery(query);
+            parsedQuery = this.parseQuery(query);
 
         return new Promise((resolve, reject) => {
-            request('POST', uri).send(subResourceData).query(parsedQuery).end(BlueprintService.defaultResponseHandler.bind(this, resolve, reject));
+            request('POST', uri).send(subResourceData).query(parsedQuery).end(this.defaultResponseHandler.bind(this, resolve, reject));
         });
     }
 
-    Link(request: request.SuperAgentStatic, resourceId: string, subResource: string, subResourceId: string, query: any) {
+    public Link(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceId: string, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }/${ subResource }/${ subResourceId }`,
-            parsedQuery = BlueprintService.parseQuery(query);
+            parsedQuery = this.parseQuery(query);
 
         return new Promise((resolve, reject) => {
-            request('GET', uri).query(parsedQuery).end(BlueprintService.defaultResponseHandler.bind(this, resolve, reject));
+            request('GET', uri).query(parsedQuery).end(this.defaultResponseHandler.bind(this, resolve, reject));
         });
     }
 
-    UnLink(request: request.SuperAgentStatic, resourceId: string, subResource: string, subResourceId: string, query: any) {
+    public UnLink(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceId: string, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }/${ subResource }/${ subResourceId }`,
-            parsedQuery = BlueprintService.parseQuery(query);
+            parsedQuery = this.parseQuery(query);
 
         return new Promise((resolve, reject) => {
-            request('DELETE', uri).query(parsedQuery).end(BlueprintService.defaultResponseHandler.bind(this, resolve, reject));
+            request('DELETE', uri).query(parsedQuery).end(this.defaultResponseHandler.bind(this, resolve, reject));
         });
     }
 }
