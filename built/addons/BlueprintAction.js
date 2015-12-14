@@ -76,7 +76,7 @@ var BlueprintAction = (function () {
         this.resourceName = opts.resourceName;
         // private apiService
         this.apiService = opts.apiService;
-        if (typeof this.resourceName !== 'function') {
+        if (typeof this.apiService !== 'function') {
             this.apiService = new BlueprintService_1.BlueprintService({ resourceName: this.resourceName });
         }
     }
