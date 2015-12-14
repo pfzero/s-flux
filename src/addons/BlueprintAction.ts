@@ -90,7 +90,7 @@ class BlueprintAction implements shapes.IBlueprintActions {
 
         // private apiService
         this.apiService = opts.apiService;
-        if (typeof this.apiService !== 'function') {
+        if (typeof this.apiService !== 'object') {
             this.apiService = new BlueprintService({ resourceName: this.resourceName });
         }
     }
