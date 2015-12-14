@@ -183,5 +183,5 @@ export default class BlueprintStore extends BaseStore {
     static name: string;
     static storeName: string;
     static actionHandlers: typeof DispatchHandlers;
-    static getHandlers(): shapes.IStoreDispatcher;
+    static getHandlers(storeName?: string): shapes.IStoreDispatcher;
 }

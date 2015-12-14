@@ -465,8 +465,8 @@ export default class BlueprintStore extends BaseStore {
 
     public static actionHandlers = DispatchHandlers;
 
-    public static getHandlers(): shapes.IStoreDispatcher {
-        const resourceName = this.name || this.storeName;
+    public static getHandlers(storeName?: string): shapes.IStoreDispatcher {
+        const resourceName = storeName || this.name || this.storeName;
 
         const create = constants.getActionConstants(resourceName, 'create'),
             update = constants.getActionConstants(resourceName, 'update'),

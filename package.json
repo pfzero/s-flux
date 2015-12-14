@@ -1,6 +1,6 @@
 {
   "name": "sflux",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A Flux dispatcher for applications that run on the server and the client.",
   "main": "built/lib/Dispatcher.js",
   "repository": {

@@ -377,8 +377,8 @@ var BlueprintStore = (function (_super) {
             return ids.indexOf(item.get('id')) > -1;
         });
     };
-    BlueprintStore.getHandlers = function () {
-        var resourceName = this.name || this.storeName;
+    BlueprintStore.getHandlers = function (storeName) {
+        var resourceName = storeName || this.name || this.storeName;
         var create = constants.getActionConstants(resourceName, 'create'), update = constants.getActionConstants(resourceName, 'update'), getById = constants.getActionConstants(resourceName, 'getbyid'), getBy = constants.getActionConstants(resourceName, 'getby'), del = constants.getActionConstants(resourceName, 'delete'), find = constants.getActionConstants(resourceName, 'find'), addTo = constants.getActionConstants(resourceName, 'addTo'), link = constants.getActionConstants(resourceName, 'link'), unlink = constants.getActionConstants(resourceName, 'unlink');
         var handlers = {};
         // create success
