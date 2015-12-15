@@ -73,6 +73,7 @@ export default class BaseStore extends components.Store {
      * with store dispatching, resulting in wrong functionality
      */
     emitChangeAsync(param?: any) {
+        this.hasChanged = true;
         setImmediate(() => this.emitChange(param));
     }
 }

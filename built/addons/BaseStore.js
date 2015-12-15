@@ -66,6 +66,7 @@ var BaseStore = (function (_super) {
      */
     BaseStore.prototype.emitChangeAsync = function (param) {
         var _this = this;
+        this.hasChanged = true;
         setImmediate(function () { return _this.emitChange(param); });
     };
     return BaseStore;
