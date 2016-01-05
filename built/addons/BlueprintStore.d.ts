@@ -22,7 +22,7 @@ export declare class DispatchHandlers {
      * 								res: {parsed version of the response from server}
      *                         }
      */
-    static Create(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static create(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
     /**
      * Update() is the dispatcher for ResourceName_UPDATE_SUCCESS;
      *
@@ -38,7 +38,7 @@ export declare class DispatchHandlers {
      * 								res: {}
      *                         }
      */
-    static Update(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static update(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
     /**
      * UpdateOptimistic is the dispatcher for ResourceName_UPDATE
      *
@@ -51,7 +51,7 @@ export declare class DispatchHandlers {
      *                         		givenInput: [resourceId, resourceData]
      *                         }
      */
-    static UpdateOptimistic(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static updateOptimistic(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
     /**
      * UpdateError is the dispatcher for ResourceName_UPDATE_ERROR
      *
@@ -68,7 +68,7 @@ export declare class DispatchHandlers {
      *                         		err: {}
      *                         }
      */
-    static UpdateError(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static updateError(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
     /**
      * GetById is the action handler for ResourceName_GETBYID_SUCCESS
      *
@@ -80,7 +80,7 @@ export declare class DispatchHandlers {
      *                         		givenInput: [resourceId]
      *                         }
      */
-    static GetById(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static getById(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
     /**
      * GetBy is the action handler for ResourceName_GETBY_SUCCESS
      *
@@ -94,7 +94,7 @@ export declare class DispatchHandlers {
      *                         		givenInput: [searchedFieldsObject]
      *                         }
      */
-    static GetBy(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static getBy(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
     /**
      * Delete is the action handler for ResourceName_DELETE_SUCCESS
      *
@@ -106,7 +106,7 @@ export declare class DispatchHandlers {
      *                         		givenInput: [resourceId]
      *                         }
      */
-    static Delete(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static delete(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
     /**
      * DeleteOptimistic is the action handler for ResourceName_DELETE
      *
@@ -120,7 +120,7 @@ export declare class DispatchHandlers {
      *                         		givenInput: [resourceId]
      *                         }
      */
-    static DeleteOptimistic(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static deleteOptimistic(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
     /**
      * DeleteError is the action handler for ResourceName_DELETE_ERROR
      *
@@ -129,7 +129,7 @@ export declare class DispatchHandlers {
      *
      * @param {Object} payload **SAME AS DeleteOptimistic from above**
      */
-    static DeleteError(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static deleteError(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
     /**
      * Find is the action handler for the action ResourceName_FIND_SUCCESS
      *
@@ -144,12 +144,12 @@ export declare class DispatchHandlers {
      *                         		res: {}
      *                         }
      */
-    static Find(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
-    static AddTo(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
-    static Link(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
-    static Unlink(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
-    static UnlinkOptimistic(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
-    static UnlinkError(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static find(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static addTo(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static link(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static unlink(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static unlinkOptimistic(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
+    static unlinkError(storeInstance: BlueprintStore, payload: shapes.IActionPayload): void;
 }
 export default class BlueprintStore extends BaseStore {
     protected resourceName: string;
@@ -175,11 +175,11 @@ export default class BlueprintStore extends BaseStore {
      */
     rehydrate(state: any): void;
     getPK(): string;
-    GetAll(): IEntityList;
-    GetById(id: string): IEntity;
-    GetBy(filterObject: any): Im.Iterable<number, IEntity>;
-    GetLastSearch(): IEntityList;
-    GetListByIds(ids?: string[]): Im.Iterable<number, IEntity>;
+    getAll(): IEntityList;
+    getById(id: string): IEntity;
+    getBy(filterObject: any): Im.Iterable<number, IEntity>;
+    getLastSearch(): IEntityList;
+    getListByIds(ids?: string[]): Im.Iterable<number, IEntity>;
     static name: string;
     static storeName: string;
     static actionHandlers: typeof DispatchHandlers;

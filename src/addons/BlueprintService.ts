@@ -113,14 +113,14 @@ export class BlueprintService extends ServiceResponseParser implements shapes.IB
         return 'id';
     }
 
-    public Create(request: shapes.IRestMethod, data: any, query: any) {
+    public create(request: shapes.IRestMethod, data: any, query: any) {
         const parsedQuery = this.parseQuery(query);
         return new Promise((resolve, reject) => {
             request('POST', this.getResourceName()).send(data).query(parsedQuery).end(this.defaultResponseHandler.bind(this, resolve, reject));
         });
     }
 
-    public Update(request: shapes.IRestMethod, resourceId: string, data: any, query: any) {
+    public update(request: shapes.IRestMethod, resourceId: string, data: any, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }`,
             parsedQuery = this.parseQuery(query);
 
@@ -130,11 +130,11 @@ export class BlueprintService extends ServiceResponseParser implements shapes.IB
     }
     
     // alias Update
-    public Batch(request: shapes.IRestMethod, resourceId: string, data: any, query: any) {
-        return this.Update(request, resourceId, data, query);
+    public batch(request: shapes.IRestMethod, resourceId: string, data: any, query: any) {
+        return this.update(request, resourceId, data, query);
     }
 
-    public Delete(request: shapes.IRestMethod, resourceId: string, query: any) {
+    public delete(request: shapes.IRestMethod, resourceId: string, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }`,
             parsedQuery = this.parseQuery(query);
 
@@ -142,7 +142,7 @@ export class BlueprintService extends ServiceResponseParser implements shapes.IB
             request('DELETE', uri).query(parsedQuery).end(this.defaultResponseHandler.bind(this, resolve, reject));
         });
     }
-    public GetById(request: shapes.IRestMethod, resourceId: string, query: any) {
+    public getById(request: shapes.IRestMethod, resourceId: string, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }`,
             parsedQuery = this.parseQuery(query);
 
@@ -151,11 +151,11 @@ export class BlueprintService extends ServiceResponseParser implements shapes.IB
         });
     }
 
-    public GetBy(request: shapes.IRestMethod, fields: Object, query: any) {
-        return this.Find(request, fields, query);
+    public getBy(request: shapes.IRestMethod, fields: Object, query: any) {
+        return this.find(request, fields, query);
     }
 
-    public Find(request: shapes.IRestMethod, criteria: any = {}, query: any = {}) {
+    public find(request: shapes.IRestMethod, criteria: any = {}, query: any = {}) {
 
         var complexCriteria = query;
 
@@ -170,7 +170,7 @@ export class BlueprintService extends ServiceResponseParser implements shapes.IB
         });
     }
 
-    public AddTo(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceData: any, query: any) {
+    public addTo(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceData: any, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }/${ subResource }`,
             parsedQuery = this.parseQuery(query);
 
@@ -179,7 +179,7 @@ export class BlueprintService extends ServiceResponseParser implements shapes.IB
         });
     }
 
-    public Link(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceId: string, query: any) {
+    public link(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceId: string, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }/${ subResource }/${ subResourceId }`,
             parsedQuery = this.parseQuery(query);
 
@@ -188,7 +188,7 @@ export class BlueprintService extends ServiceResponseParser implements shapes.IB
         });
     }
 
-    public UnLink(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceId: string, query: any) {
+    public unLink(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceId: string, query: any) {
         const uri = `${ this.getResourceName() }/${ resourceId }/${ subResource }/${ subResourceId }`,
             parsedQuery = this.parseQuery(query);
 

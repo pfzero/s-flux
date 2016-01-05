@@ -31,12 +31,12 @@ export default class NotificationStore extends BaseStore {
     * @public
     * @param {Im.Map} type the found error
     */
-    GetByType(type: string): IFlashNotificationEntity;
+    getByType(type: string): IFlashNotificationEntity;
     /**
      * Returns all the notifications from this store
      * @public
      * @return {Im.List}           the list of notifications
      */
-    GetAll(): IFlashNotificationEntityList;
+    getAll(): IFlashNotificationEntityList;
     static getHandlers(): shapes.IStoreDispatcher;
 }

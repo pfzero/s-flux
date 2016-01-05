@@ -124,8 +124,8 @@ export default class ErrorStore extends BaseStore {
      * @public
      * @param {Im.Map} type the found error
      */
-    GetByType(type: string) {
-        let errors = this.GetAll();
+    getByType(type: string) {
+        let errors = this.getAll();
 
         return errors.find(err => {
             if (err.get('baseAction') === type.toUpperCase()) {
@@ -139,7 +139,7 @@ export default class ErrorStore extends BaseStore {
      * @public
      * @return {Im.List}           the list of errors
      */
-    GetAll() {
+    getAll() {
         return this.errors;
     }
 
@@ -173,7 +173,7 @@ export default class ErrorStore extends BaseStore {
         // this store.
         handlers['REMOVE_ERROR'] = (storeInstance: ErrorStore, errorId: string) => {
 
-            const newCollection = <IErrorEntityList>storeInstance.GetAll().filter(err => {
+            const newCollection = <IErrorEntityList>storeInstance.getAll().filter(err => {
                 return err.get('id') !== errorId;
             });
 

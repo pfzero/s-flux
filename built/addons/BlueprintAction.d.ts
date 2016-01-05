@@ -23,16 +23,16 @@ declare class BlueprintAction implements shapes.IBlueprintActions {
     private callService(action, service, ...data);
     protected getResourceName(): string;
     protected getApiService(): any;
-    protected BaseAction(action: string, ctx: shapes.IContext, ...givenInput: Array<any>): Promise<void>;
-    Create(ctx: shapes.IContext, resourceData: any, query?: any): Promise<void>;
-    GetById(ctx: shapes.IContext, resourceId: string, query?: string): Promise<void>;
-    GetBy(ctx: shapes.IContext, fields?: any, query?: any): Promise<void>;
-    Batch(ctx: shapes.IContext, resourceId: string, resourceData: any, query: any): Promise<void>;
-    Update(ctx: shapes.IContext, resourceId: string, resourceData: any, query: any): Promise<void>;
-    Delete(ctx: shapes.IContext, resourceId: string, query?: string): Promise<void>;
-    Find(ctx: shapes.IContext, query: any): Promise<void>;
-    AddTo(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceData: any, query: any): Promise<void>;
-    Link(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceId: string, query: any): Promise<void>;
-    UnLink(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceId: string, query: any): Promise<void>;
+    protected baseAction(action: string, ctx: shapes.IContext, ...givenInput: Array<any>): Promise<void>;
+    create(ctx: shapes.IContext, resourceData: any, query?: any): Promise<void>;
+    getById(ctx: shapes.IContext, resourceId: string, query?: string): Promise<void>;
+    getBy(ctx: shapes.IContext, fields?: any, query?: any): Promise<void>;
+    batch(ctx: shapes.IContext, resourceId: string, resourceData: any, query: any): Promise<void>;
+    update(ctx: shapes.IContext, resourceId: string, resourceData: any, query: any): Promise<void>;
+    delete(ctx: shapes.IContext, resourceId: string, query?: string): Promise<void>;
+    find(ctx: shapes.IContext, query: any): Promise<void>;
+    addTo(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceData: any, query: any): Promise<void>;
+    link(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceId: string, query: any): Promise<void>;
+    unLink(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceId: string, query: any): Promise<void>;
 }
 export default BlueprintAction;

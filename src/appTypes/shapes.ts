@@ -50,30 +50,30 @@ export interface IActions {
 import Promise = require('bluebird');
 
 export interface IBlueprintActions {
-	Create: IActionMethod
-	GetById: IActionMethod
-	GetBy: IActionMethod
+	create: IActionMethod
+	getById: IActionMethod
+	getBy: IActionMethod
 	// alias update
-	Batch: IActionMethod
-	Update: IActionMethod
-	Delete: IActionMethod
-	Find: IActionMethod
-	AddTo: IActionMethod
-	Link: IActionMethod
-	UnLink: IActionMethod
+	batch: IActionMethod
+	update: IActionMethod
+	delete: IActionMethod
+	find: IActionMethod
+	addTo: IActionMethod
+	link: IActionMethod
+	unLink: IActionMethod
 }
 
 export interface IBlueprintServices {
-	Create: IServiceMethod
-	Update: IServiceMethod
-	Batch: IServiceMethod
-	Delete: IServiceMethod
-	GetById: IServiceMethod
-	GetBy: IServiceMethod
-	Find: IServiceMethod
-	AddTo: IServiceMethod
-	Link: IServiceMethod
-	UnLink: IServiceMethod
+	create: IServiceMethod
+	update: IServiceMethod
+	batch: IServiceMethod
+	delete: IServiceMethod
+	getById: IServiceMethod
+	getBy: IServiceMethod
+	find: IServiceMethod
+	addTo: IServiceMethod
+	link: IServiceMethod
+	unLink: IServiceMethod
 }
 
 export interface IParsedResponse extends IAppErrorDescription {

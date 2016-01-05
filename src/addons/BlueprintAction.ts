@@ -107,7 +107,7 @@ class BlueprintAction implements shapes.IBlueprintActions {
         return this.apiService;
     }
 
-    protected BaseAction(action: string, ctx: shapes.IContext, ...givenInput: Array<any>) {
+    protected baseAction(action: string, ctx: shapes.IContext, ...givenInput: Array<any>) {
         let actionConstants = constants.getActionConstants(this.getResourceName(), action);
 
         blueprintActionDebug('dispatching...', actionConstants.base);
@@ -132,45 +132,45 @@ class BlueprintAction implements shapes.IBlueprintActions {
         });
     }
 
-    public Create(ctx: shapes.IContext, resourceData: any, query?: any) {
-        return this.BaseAction('Create', ctx, resourceData, query);
+    public create(ctx: shapes.IContext, resourceData: any, query?: any) {
+        return this.baseAction('create', ctx, resourceData, query);
     }
 
-    public GetById(ctx: shapes.IContext, resourceId: string, query?: string) {
-        return this.BaseAction('GetById', ctx, resourceId, query);
+    public getById(ctx: shapes.IContext, resourceId: string, query?: string) {
+        return this.baseAction('getById', ctx, resourceId, query);
     }
 
-    public GetBy(ctx: shapes.IContext, fields?: any, query?: any) {
-        return this.BaseAction('GetBy', ctx, fields, query);
+    public getBy(ctx: shapes.IContext, fields?: any, query?: any) {
+        return this.baseAction('getBy', ctx, fields, query);
     }
         
     // alias Update
-    public Batch(ctx: shapes.IContext, resourceId: string, resourceData: any, query: any) {
-        return this.Update(ctx, resourceId, resourceData, query);
+    public batch(ctx: shapes.IContext, resourceId: string, resourceData: any, query: any) {
+        return this.update(ctx, resourceId, resourceData, query);
     }
 
-    public Update(ctx: shapes.IContext, resourceId: string, resourceData: any, query: any) {
-        return this.BaseAction('Update', ctx, resourceId, resourceData, query);
+    public update(ctx: shapes.IContext, resourceId: string, resourceData: any, query: any) {
+        return this.baseAction('update', ctx, resourceId, resourceData, query);
     }
 
-    public Delete(ctx: shapes.IContext, resourceId: string, query?: string) {
-        return this.BaseAction('Delete', ctx, resourceId, query);
+    public delete(ctx: shapes.IContext, resourceId: string, query?: string) {
+        return this.baseAction('delete', ctx, resourceId, query);
     }
 
-    public Find(ctx: shapes.IContext, query: any) {
-        return this.BaseAction('Find', ctx, query);
+    public find(ctx: shapes.IContext, query: any) {
+        return this.baseAction('find', ctx, query);
     }
 
-    public AddTo(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceData: any, query: any) {
-        return this.BaseAction('AddTo', ctx, resourceId, subResourceName, subResourceData, query);
+    public addTo(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceData: any, query: any) {
+        return this.baseAction('addTo', ctx, resourceId, subResourceName, subResourceData, query);
     }
 
-    public Link(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceId: string, query: any) {
-        return this.BaseAction('Link', ctx, resourceId, subResourceName, subResourceId, query);
+    public link(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceId: string, query: any) {
+        return this.baseAction('link', ctx, resourceId, subResourceName, subResourceId, query);
     }
 
-    public UnLink(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceId: string, query: any) {
-        return this.BaseAction('UnLink', ctx, resourceId, subResourceName, subResourceId, query);
+    public unLink(ctx: shapes.IContext, resourceId: string, subResourceName: string, subResourceId: string, query: any) {
+        return this.baseAction('unLink', ctx, resourceId, subResourceName, subResourceId, query);
     }
 }
 

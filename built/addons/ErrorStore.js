@@ -92,8 +92,8 @@ var ErrorStore = (function (_super) {
      * @public
      * @param {Im.Map} type the found error
      */
-    ErrorStore.prototype.GetByType = function (type) {
-        var errors = this.GetAll();
+    ErrorStore.prototype.getByType = function (type) {
+        var errors = this.getAll();
         return errors.find(function (err) {
             if (err.get('baseAction') === type.toUpperCase()) {
                 return true;
@@ -105,7 +105,7 @@ var ErrorStore = (function (_super) {
      * @public
      * @return {Im.List}           the list of errors
      */
-    ErrorStore.prototype.GetAll = function () {
+    ErrorStore.prototype.getAll = function () {
         return this.errors;
     };
     ErrorStore.getHandlers = function () {
@@ -131,7 +131,7 @@ var ErrorStore = (function (_super) {
         // handler for removing the error from
         // this store.
         handlers['REMOVE_ERROR'] = function (storeInstance, errorId) {
-            var newCollection = storeInstance.GetAll().filter(function (err) {
+            var newCollection = storeInstance.getAll().filter(function (err) {
                 return err.get('id') !== errorId;
             });
             storeInstance.errors = newCollection;
