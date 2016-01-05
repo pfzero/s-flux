@@ -1,24 +1,25 @@
-# Dispatchr with Flux addons
+## Dispatchr with Flux addons
+
 ---
 
-A [Flux](http://facebook.github.io/flux/docs/overview.html) dispatcher for applications that run on the server and the client.
+**A [Flux](http://facebook.github.io/flux/docs/overview.html) dispatcher for applications that run on the server and the client.**
 
-The package also contains store skeletons for communicating with RESTfull webservices - e.g. [sailsjs](http://github.com/balderdashy/sails).
-## Installation
----
+**The package also contains store skeletons for communicating with RESTfull webservices - e.g. [sailsjs](http://github.com/balderdashy/sails).**
+### Installation
 
-NodeJS:
 ```js
 npm install --save s-flux
 ```
-## Usage
----
-### Creating a service
-#### NOTE:
-you must create a service ONLY if you want to extend it with additional methods. 
-If the provided methods is enough for your application, jump directly to [Creating an action] section.
+<br/>
 
-Services are used to communicate with a RESTfull backend (using [superagent](https://github.com/visionmedia/superagent) for requests)
+### Usage
+
+---
+###### Creating a service
+**NOTE:** You must create a service **ONLY** if you want to extend it with additional methods. 
+If the provided methods is enough for your application, jump directly to [**Creating an action**] section.
+
+Services are used to communicate with a **RESTfull** backend (using [superagent](https://github.com/visionmedia/superagent) for requests)
  
 ```js
 // in /<Flux Folder Name>/UserService.js
@@ -42,8 +43,8 @@ class UserService extends BlueprintService {
 export default UserService;
 
 ```
-
-### Creating an action
+<br/>
+###### Creating an action
 ```js
 // in /<Flux Folder Name>/UserActions.js
 // create user actions
@@ -72,8 +73,8 @@ class UserAction extends BlueprintAction {
 
 export default UserAction;
 ```
-
-### Creating a store
+<br/>
+###### Creating a store
 ```js
 // in /<Flux Folder Name>/UserStore.js
 // create store for users
@@ -119,8 +120,8 @@ UserStore.getHandlers = function() {
 
 export default UserStore;
 ```
-
-### Instantiating the dispatcher and registering stores and actions
+<br/>
+###### Instantiating the dispatcher and registering stores and actions
 
 ```js
 // in /<Flux Folder Name>/index.js
@@ -146,8 +147,8 @@ appDispatcher.registerActions('UserActions', UserActions);
 
 export default appDispatcher;
 ```
-
-#### Server side usage example
+<br/>
+###### Server side usage example
 ```js
 import appDispatcher from 'path/to/fluxFolder';
 
@@ -169,7 +170,8 @@ expressApp.use((req, res, next) => {
 });
 
 ```
-#### Client side usage example
+<br/>
+###### Client side usage example
 
 ```js
 // in <client entry point>.js
@@ -206,10 +208,13 @@ UserActionInstance.create({
     'lastname': 'User'
 });
 ```
+<br>
 
-## API
----
-### Actions
+
+###API
+
+---------
+###### Actions
 
 These methods are available by default through `BlueprintAction` class:
  
@@ -219,9 +224,10 @@ These methods are available by default through `BlueprintAction` class:
  - `.update(contextObject, uniqueIdString, payloadObject)` 
  - `.delete(contextObject, uniqueIdString)` 
  - `.find(contextObject, queryObject)`
-    + more soon ... 
+    
+ \+ more soon ... 
 
-### Services
+###### Services
 
 When you extend `BlueprintService` class your service instance will inherit the following methods
  
@@ -232,12 +238,13 @@ When you extend `BlueprintService` class your service instance will inherit the 
  - `.delete(contextObject, uniqueIdString)` => will make a `DELETE` request to /<API_URL>/<ResourceName>/<uniqueId>
  - `.find(contextObject, queryObject)` => will make a `GET` request to /<API_URL>/<ResourceName>?<parsedQuery>
 
- + more soon ...
+ \+ more soon ...
 
-### Stores
+###### Stores
 
 ... coming soon
 
-## Licence
+### Licence
+
 ---
-MIT
+**MIT**
