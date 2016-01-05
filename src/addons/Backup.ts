@@ -8,16 +8,16 @@ export default class Backup {
 
     constructor() { }
 
-    Add(id: number, value: any): Backup {
+    add(id: number, value: any): Backup {
         this.backupList[id] = value;
         return this;
     }
 
-    Get(id: string | number, notFoundValue: any = undefined): any {
+    get(id: string | number, notFoundValue: any = undefined): any {
         return this.backupList[id] || notFoundValue;
     }
 
-    Remove(id: number): Backup {
+    remove(id: number): Backup {
         this.backupList[id] = undefined;
         return this;
     }

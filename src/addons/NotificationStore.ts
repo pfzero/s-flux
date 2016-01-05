@@ -88,8 +88,8 @@ export default class NotificationStore extends BaseStore {
     * @public
     * @param {Im.Map} type the found error
     */
-    GetByType(type: string) {
-        let notifications = this.GetAll();
+    getByType(type: string) {
+        let notifications = this.getAll();
 
         return notifications.find(err => {
             if (err.get('actionType') === type.toUpperCase()) {
@@ -103,7 +103,7 @@ export default class NotificationStore extends BaseStore {
      * @public
      * @return {Im.List}           the list of notifications
      */
-    GetAll() {
+    getAll() {
         return this.notifications;
     }
 
@@ -135,7 +135,7 @@ export default class NotificationStore extends BaseStore {
         // this store.
         handlers['REMOVE_NOTIFICATION'] = (storeInstance: NotificationStore, errorId: string) => {
 
-            const newCollection = <IFlashNotificationEntityList>storeInstance.GetAll().filter(err => {
+            const newCollection = <IFlashNotificationEntityList>storeInstance.getAll().filter(err => {
                 return err.get('id') !== errorId;
             });
             storeInstance.notifications = newCollection;

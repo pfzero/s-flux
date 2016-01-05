@@ -34,12 +34,12 @@ export default class ErrorStore extends BaseStore {
      * @public
      * @param {Im.Map} type the found error
      */
-    GetByType(type: string): IErrorEntity;
+    getByType(type: string): IErrorEntity;
     /**
      * Returns all the errors from this store
      * @public
      * @return {Im.List}           the list of errors
      */
-    GetAll(): IErrorEntityList;
+    getAll(): IErrorEntityList;
     static getHandlers(): shapes.IStoreDispatcher;
 }

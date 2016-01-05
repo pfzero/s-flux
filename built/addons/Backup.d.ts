@@ -5,7 +5,7 @@
 export default class Backup {
     private backupList;
     constructor();
-    Add(id: number, value: any): Backup;
-    Get(id: string | number, notFoundValue?: any): any;
-    Remove(id: number): Backup;
+    add(id: number, value: any): Backup;
+    get(id: string | number, notFoundValue?: any): any;
+    remove(id: number): Backup;
 }

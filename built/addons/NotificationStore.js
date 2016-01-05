@@ -62,8 +62,8 @@ var NotificationStore = (function (_super) {
     * @public
     * @param {Im.Map} type the found error
     */
-    NotificationStore.prototype.GetByType = function (type) {
-        var notifications = this.GetAll();
+    NotificationStore.prototype.getByType = function (type) {
+        var notifications = this.getAll();
         return notifications.find(function (err) {
             if (err.get('actionType') === type.toUpperCase()) {
                 return true;
@@ -75,7 +75,7 @@ var NotificationStore = (function (_super) {
      * @public
      * @return {Im.List}           the list of notifications
      */
-    NotificationStore.prototype.GetAll = function () {
+    NotificationStore.prototype.getAll = function () {
         return this.notifications;
     };
     NotificationStore.getHandlers = function () {
@@ -101,7 +101,7 @@ var NotificationStore = (function (_super) {
         // handler for removing the error from
         // this store.
         handlers['REMOVE_NOTIFICATION'] = function (storeInstance, errorId) {
-            var newCollection = storeInstance.GetAll().filter(function (err) {
+            var newCollection = storeInstance.getAll().filter(function (err) {
                 return err.get('id') !== errorId;
             });
             storeInstance.notifications = newCollection;

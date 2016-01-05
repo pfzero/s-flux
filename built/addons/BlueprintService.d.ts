@@ -12,14 +12,14 @@ export declare class BlueprintService extends ServiceResponseParser implements s
     constructor(opts: shapes.IResourceOptions);
     protected getResourceName(): string;
     protected getPK(): string;
-    Create(request: shapes.IRestMethod, data: any, query: any): Promise<{}>;
-    Update(request: shapes.IRestMethod, resourceId: string, data: any, query: any): Promise<{}>;
-    Batch(request: shapes.IRestMethod, resourceId: string, data: any, query: any): Promise<{}>;
-    Delete(request: shapes.IRestMethod, resourceId: string, query: any): Promise<{}>;
-    GetById(request: shapes.IRestMethod, resourceId: string, query: any): Promise<{}>;
-    GetBy(request: shapes.IRestMethod, fields: Object, query: any): Promise<{}>;
-    Find(request: shapes.IRestMethod, criteria?: any, query?: any): Promise<{}>;
-    AddTo(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceData: any, query: any): Promise<{}>;
-    Link(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceId: string, query: any): Promise<{}>;
-    UnLink(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceId: string, query: any): Promise<{}>;
+    create(request: shapes.IRestMethod, data: any, query: any): Promise<{}>;
+    update(request: shapes.IRestMethod, resourceId: string, data: any, query: any): Promise<{}>;
+    batch(request: shapes.IRestMethod, resourceId: string, data: any, query: any): Promise<{}>;
+    delete(request: shapes.IRestMethod, resourceId: string, query: any): Promise<{}>;
+    getById(request: shapes.IRestMethod, resourceId: string, query: any): Promise<{}>;
+    getBy(request: shapes.IRestMethod, fields: Object, query: any): Promise<{}>;
+    find(request: shapes.IRestMethod, criteria?: any, query?: any): Promise<{}>;
+    addTo(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceData: any, query: any): Promise<{}>;
+    link(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceId: string, query: any): Promise<{}>;
+    unLink(request: shapes.IRestMethod, resourceId: string, subResource: string, subResourceId: string, query: any): Promise<{}>;
 }

@@ -28,8 +28,8 @@ var DispatchHandlers = (function () {
      * 								res: {parsed version of the response from server}
      *                         }
      */
-    DispatchHandlers.Create = function (storeInstance, payload) {
-        var resource = payload.res.data, imResource = Im.fromJS(resource), newCollection = storeInstance.GetAll().push(imResource);
+    DispatchHandlers.create = function (storeInstance, payload) {
+        var resource = payload.res.data, imResource = Im.fromJS(resource), newCollection = storeInstance.getAll().push(imResource);
         storeInstance.entities = newCollection;
         storeInstance.emitChangeAsync();
     };
@@ -49,10 +49,10 @@ var DispatchHandlers = (function () {
      * 								res: {}
      *                         }
      */
-    DispatchHandlers.Update = function (storeInstance, payload) {
-        var resource = payload.res.data, imResource = Im.fromJS(resource), resourceId = payload.givenInput[0], oldResourceIndex = storeInstance.GetAll().findIndex(function (item) {
+    DispatchHandlers.update = function (storeInstance, payload) {
+        var resource = payload.res.data, imResource = Im.fromJS(resource), resourceId = payload.givenInput[0], oldResourceIndex = storeInstance.getAll().findIndex(function (item) {
             return item.get('id') === resourceId;
-        }), oldCollection = storeInstance.GetAll(), newCollection;
+        }), oldCollection = storeInstance.getAll(), newCollection;
         // add to list if not found
         if (oldResourceIndex === -1) {
             newCollection = oldCollection.push(imResource);
@@ -60,7 +60,7 @@ var DispatchHandlers = (function () {
         else {
             newCollection = oldCollection.set(oldResourceIndex, imResource);
         }
-        storeInstance.backup.Remove(resourceId);
+        storeInstance.backup.remove(resourceId);
         storeInstance.entities = newCollection;
         storeInstance.emitChangeAsync();
     };
@@ -77,8 +77,8 @@ var DispatchHandlers = (function () {
      *                         		givenInput: [resourceId, resourceData]
      *                         }
      */
-    DispatchHandlers.UpdateOptimistic = function (storeInstance, payload) {
-        var resourceId = payload.givenInput[0], changes = payload.givenInput[1], oldResource = storeInstance.GetById(resourceId), oldResourceIndex = storeInstance.GetAll().findIndex(function (item) {
+    DispatchHandlers.updateOptimistic = function (storeInstance, payload) {
+        var resourceId = payload.givenInput[0], changes = payload.givenInput[1], oldResource = storeInstance.getById(resourceId), oldResourceIndex = storeInstance.getAll().findIndex(function (item) {
             return item.get('id') === resourceId;
         }), newResource, newCollection;
         // no resource found in the store
@@ -89,9 +89,9 @@ var DispatchHandlers = (function () {
         // set the changes onto the old entity
         newResource = oldResource.merge(changes);
         // modify the collection with the new value
-        newCollection = storeInstance.GetAll().set(oldResourceIndex, newResource);
+        newCollection = storeInstance.getAll().set(oldResourceIndex, newResource);
         // add the old entity in the backup store
-        storeInstance.backup.Add(oldResource.get('id'), oldResource);
+        storeInstance.backup.add(oldResource.get('id'), oldResource);
         // change the entites within the store
         storeInstance.entities = newCollection;
         storeInstance.emitChangeAsync();
@@ -112,10 +112,10 @@ var DispatchHandlers = (function () {
      *                         		err: {}
      *                         }
      */
-    DispatchHandlers.UpdateError = function (storeInstance, payload) {
-        var resourceId = payload.givenInput[0], backupResource = storeInstance.backup.Get(resourceId), updatedIndex = storeInstance.GetAll().findIndex(function (item) {
+    DispatchHandlers.updateError = function (storeInstance, payload) {
+        var resourceId = payload.givenInput[0], backupResource = storeInstance.backup.get(resourceId), updatedIndex = storeInstance.getAll().findIndex(function (item) {
             return item.get('id') === resourceId;
-        }), oldCollection = storeInstance.GetAll(), newCollection;
+        }), oldCollection = storeInstance.getAll(), newCollection;
         // if no backup was found
         // nothing to do
         if (!backupResource) {
@@ -124,7 +124,7 @@ var DispatchHandlers = (function () {
         // add the item from backup in the new set
         newCollection = oldCollection.set(updatedIndex, backupResource);
         // removed the item from backup store
-        storeInstance.backup.Remove(resourceId);
+        storeInstance.backup.remove(resourceId);
         storeInstance.entities = newCollection;
         storeInstance.emitChangeAsync();
     };
@@ -140,10 +140,10 @@ var DispatchHandlers = (function () {
      *                         		givenInput: [resourceId]
      *                         }
      */
-    DispatchHandlers.GetById = function (storeInstance, payload) {
-        var resourceId = payload.givenInput[0], data = payload.res.data, imResource = Im.fromJS(data), existingIndex = storeInstance.GetAll().findIndex(function (item) {
+    DispatchHandlers.getById = function (storeInstance, payload) {
+        var resourceId = payload.givenInput[0], data = payload.res.data, imResource = Im.fromJS(data), existingIndex = storeInstance.getAll().findIndex(function (item) {
             return item.get('id') === resourceId;
-        }), oldCollection = storeInstance.GetAll(), newCollection;
+        }), oldCollection = storeInstance.getAll(), newCollection;
         // just add
         if (existingIndex === -1) {
             newCollection = oldCollection.push(imResource);
@@ -168,8 +168,8 @@ var DispatchHandlers = (function () {
      *                         		givenInput: [searchedFieldsObject]
      *                         }
      */
-    DispatchHandlers.GetBy = function (storeInstance, payload) {
-        var data = payload.res.data, imList = Im.List(Im.fromJS(data)), oldCollection = storeInstance.GetAll();
+    DispatchHandlers.getBy = function (storeInstance, payload) {
+        var data = payload.res.data, imList = Im.List(Im.fromJS(data)), oldCollection = storeInstance.getAll();
         imList.forEach(function (item) {
             var id = item.get('id'), existingIndex = oldCollection.findIndex(function (oldItem) {
                 return oldItem.get('id') === id;
@@ -198,10 +198,10 @@ var DispatchHandlers = (function () {
      *                         		givenInput: [resourceId]
      *                         }
      */
-    DispatchHandlers.Delete = function (storeInstance, payload) {
+    DispatchHandlers.delete = function (storeInstance, payload) {
         var resourceId = payload.givenInput[0];
         // just clear the backup
-        storeInstance.backup.Remove(resourceId);
+        storeInstance.backup.remove(resourceId);
     };
     ;
     /**
@@ -217,10 +217,10 @@ var DispatchHandlers = (function () {
      *                         		givenInput: [resourceId]
      *                         }
      */
-    DispatchHandlers.DeleteOptimistic = function (storeInstance, payload) {
-        var resourceId = payload.givenInput[0], resource = storeInstance.GetById(resourceId), index = storeInstance.GetAll().findIndex(function (item) {
+    DispatchHandlers.deleteOptimistic = function (storeInstance, payload) {
+        var resourceId = payload.givenInput[0], resource = storeInstance.getById(resourceId), index = storeInstance.getAll().findIndex(function (item) {
             return item.get('id') === resourceId;
-        }), oldCollection = storeInstance.GetAll();
+        }), oldCollection = storeInstance.getAll();
         var newCollection;
         // nothing found in store
         // nothing to do
@@ -228,7 +228,7 @@ var DispatchHandlers = (function () {
             return;
         }
         // store old item in backup
-        storeInstance.backup.Add(resourceId, {
+        storeInstance.backup.add(resourceId, {
             resource: resource,
             index: index
         });
@@ -246,8 +246,8 @@ var DispatchHandlers = (function () {
      *
      * @param {Object} payload **SAME AS DeleteOptimistic from above**
      */
-    DispatchHandlers.DeleteError = function (storeInstance, payload) {
-        var resourceId = payload.givenInput[0], bk = storeInstance.backup.Get(resourceId), oldCollection = storeInstance.GetAll();
+    DispatchHandlers.deleteError = function (storeInstance, payload) {
+        var resourceId = payload.givenInput[0], bk = storeInstance.backup.get(resourceId), oldCollection = storeInstance.getAll();
         var newCollection;
         // if the item not found in
         // backup (i.e. the item was not found in the store
@@ -260,7 +260,7 @@ var DispatchHandlers = (function () {
         newCollection = oldCollection.splice(bk.index, 0, bk.resource);
         storeInstance.entities = newCollection;
         // clean the backup
-        storeInstance.backup.Remove(resourceId);
+        storeInstance.backup.remove(resourceId);
         // done
         storeInstance.emitChangeAsync();
     };
@@ -279,26 +279,26 @@ var DispatchHandlers = (function () {
      *                         		res: {}
      *                         }
      */
-    DispatchHandlers.Find = function (storeInstance, payload) {
+    DispatchHandlers.find = function (storeInstance, payload) {
         var data = payload.res.data, imList = Im.List(Im.fromJS(data));
         storeInstance.lastSearch = imList;
         storeInstance.emitChangeAsync();
     };
     ;
     // no implementations yet on these
-    DispatchHandlers.AddTo = function (storeInstance, payload) {
+    DispatchHandlers.addTo = function (storeInstance, payload) {
     };
     ;
-    DispatchHandlers.Link = function (storeInstance, payload) {
+    DispatchHandlers.link = function (storeInstance, payload) {
     };
     ;
-    DispatchHandlers.Unlink = function (storeInstance, payload) {
+    DispatchHandlers.unlink = function (storeInstance, payload) {
     };
     ;
-    DispatchHandlers.UnlinkOptimistic = function (storeInstance, payload) {
+    DispatchHandlers.unlinkOptimistic = function (storeInstance, payload) {
     };
     ;
-    DispatchHandlers.UnlinkError = function (storeInstance, payload) {
+    DispatchHandlers.unlinkError = function (storeInstance, payload) {
     };
     return DispatchHandlers;
 })();
@@ -326,8 +326,8 @@ var BlueprintStore = (function (_super) {
     */
     BlueprintStore.prototype.dehydrate = function () {
         return {
-            lastSearch: this.GetLastSearch().toJS(),
-            entities: this.GetAll().toJS()
+            lastSearch: this.getLastSearch().toJS(),
+            entities: this.getAll().toJS()
         };
     };
     /**
@@ -343,17 +343,17 @@ var BlueprintStore = (function (_super) {
     BlueprintStore.prototype.getPK = function () {
         return 'id';
     };
-    BlueprintStore.prototype.GetAll = function () {
+    BlueprintStore.prototype.getAll = function () {
         return this.entities;
     };
-    BlueprintStore.prototype.GetById = function (id) {
+    BlueprintStore.prototype.getById = function (id) {
         var _this = this;
         return this.entities.find(function (entity) {
             return entity.get(_this.getPK()) === id;
         });
     };
-    BlueprintStore.prototype.GetBy = function (filterObject) {
-        var allItems = this.GetAll(), keys = Object.keys(filterObject || {});
+    BlueprintStore.prototype.getBy = function (filterObject) {
+        var allItems = this.getAll(), keys = Object.keys(filterObject || {});
         // perform a filter based on given
         // filterObject        
         return allItems.filter(function (item) {
@@ -366,12 +366,12 @@ var BlueprintStore = (function (_super) {
             return found;
         });
     };
-    BlueprintStore.prototype.GetLastSearch = function () {
+    BlueprintStore.prototype.getLastSearch = function () {
         return this.lastSearch;
     };
-    BlueprintStore.prototype.GetListByIds = function (ids) {
+    BlueprintStore.prototype.getListByIds = function (ids) {
         if (ids === void 0) { ids = []; }
-        var allItems = this.GetAll();
+        var allItems = this.getAll();
         // filter the items
         return allItems.filter(function (item) {
             return ids.indexOf(item.get('id')) > -1;
@@ -382,29 +382,29 @@ var BlueprintStore = (function (_super) {
         var create = constants.getActionConstants(resourceName, 'create'), update = constants.getActionConstants(resourceName, 'update'), getById = constants.getActionConstants(resourceName, 'getbyid'), getBy = constants.getActionConstants(resourceName, 'getby'), del = constants.getActionConstants(resourceName, 'delete'), find = constants.getActionConstants(resourceName, 'find'), addTo = constants.getActionConstants(resourceName, 'addTo'), link = constants.getActionConstants(resourceName, 'link'), unlink = constants.getActionConstants(resourceName, 'unlink');
         var handlers = {};
         // create success
-        handlers[create.success] = this.actionHandlers.Create;
+        handlers[create.success] = this.actionHandlers.create;
         // optimistic update
-        handlers[update.base] = this.actionHandlers.UpdateOptimistic;
+        handlers[update.base] = this.actionHandlers.updateOptimistic;
         // successfull update
-        handlers[update.success] = this.actionHandlers.Update;
+        handlers[update.success] = this.actionHandlers.update;
         // revert in case we used optimistic update
-        handlers[update.error] = this.actionHandlers.UpdateError;
+        handlers[update.error] = this.actionHandlers.updateError;
         // read success
-        handlers[getById.success] = this.actionHandlers.GetById;
+        handlers[getById.success] = this.actionHandlers.getById;
         // get by fields success
-        handlers[getBy.success] = this.actionHandlers.GetBy;
+        handlers[getBy.success] = this.actionHandlers.getBy;
         // optimistic delete
-        handlers[del.base] = this.actionHandlers.DeleteOptimistic;
+        handlers[del.base] = this.actionHandlers.deleteOptimistic;
         // successfull delete
-        handlers[del.success] = this.actionHandlers.Delete;
-        handlers[del.error] = this.actionHandlers.DeleteError;
+        handlers[del.success] = this.actionHandlers.delete;
+        handlers[del.error] = this.actionHandlers.deleteError;
         // find success
-        handlers[find.success] = this.actionHandlers.Find;
-        handlers[addTo.success] = this.actionHandlers.AddTo;
+        handlers[find.success] = this.actionHandlers.find;
+        handlers[addTo.success] = this.actionHandlers.addTo;
         // resource was successfully linked with subresource
-        handlers[link.success] = this.actionHandlers.Link;
+        handlers[link.success] = this.actionHandlers.link;
         // subresource was successfully removed
-        handlers[unlink.success] = this.actionHandlers.Unlink;
+        handlers[unlink.success] = this.actionHandlers.unlink;
         return handlers;
     };
     BlueprintStore.actionHandlers = DispatchHandlers;

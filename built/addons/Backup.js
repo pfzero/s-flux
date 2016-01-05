@@ -6,15 +6,15 @@ var Backup = (function () {
     function Backup() {
         this.backupList = {};
     }
-    Backup.prototype.Add = function (id, value) {
+    Backup.prototype.add = function (id, value) {
         this.backupList[id] = value;
         return this;
     };
-    Backup.prototype.Get = function (id, notFoundValue) {
+    Backup.prototype.get = function (id, notFoundValue) {
         if (notFoundValue === void 0) { notFoundValue = undefined; }
         return this.backupList[id] || notFoundValue;
     };
-    Backup.prototype.Remove = function (id) {
+    Backup.prototype.remove = function (id) {
         this.backupList[id] = undefined;
         return this;
     };
